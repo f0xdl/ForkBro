@@ -10,30 +10,36 @@ using System.Threading.Tasks;
 
 namespace ForkBro.Controller.Scanner
 {
-	public class BookmakerScanner : IWorker
+	public class BookmakerClient : IWorker
 	{
 		public IBookmakerEvent[] events;
 		IBookmakerScanner scanner;
 		object idEventsLock;
 		private Func<int> eventId;
+		public int UpdatePeriod { get; set; }
 
 		//IBookmakerScanner
 		//BaseHttpRequest IBookmakerScanner.httpClient { get; set; }
 		//TODO реализовать интерфейс IBookmakerScanner для favbet
 
-		public BookmakerScanner(int countEvents = 100)
+		public BookmakerClient(EBookmakers bookmaker, int maxEvents)
 		{
-			events = new IBookmakerEvent[countEvents];
+			scanner = SetScanner(bookmaker);
+
+			if (maxEvents == 0)
+				throw new Exception("Некорректно заданно максимальное количество событий у букмекера " + bookmaker);
+			
+			events = new IBookmakerEvent[maxEvents];
 		}
-		public void SetScanner(EBookmakers item)
+		IBookmakerScanner SetScanner(EBookmakers item)
 		{
 			switch (item)
 			{
 				case EBookmakers._1xbet:
-					scanner = new Scanner_1xbet(); break;
+					return new Scanner_1xbet();
 				case EBookmakers._favbet:
-					scanner = new Scanner_1xbet(); break;
-				default: break;
+					return new Scanner_1xbet(); 
+				default: throw new Exception("Данный сканер не определён в BookmakerClient");
 			}
 		}
 		void UpdateGameData(int key) { throw new System.Exception("Not implemented"); }
@@ -80,7 +86,7 @@ namespace ForkBro.Controller.Scanner
 		bool IWorker.IsWork { get; set; }
 		Thread IWorker.thread { get; set; }
 
-		public void Start(int updatePeriod) => ((IWorker)this).StartWork(updatePeriod);
+		public void Start(int updatePeriod = -1) => ((IWorker)this).StartWork(updatePeriod == -1? UpdatePeriod: updatePeriod);
 		public void Stop(int ms_wait) => ((IWorker)this).StopWork(ms_wait);
 		async void IWorker.Work(object delay)
 		{

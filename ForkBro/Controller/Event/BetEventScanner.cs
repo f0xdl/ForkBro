@@ -14,7 +14,6 @@ namespace ForkBro.Controller.Event
 
 	public class BetEventScanner : IWorker
 	{
-		EBookmakers[] bookmakers;
 		Dictionary<EBookmakers, List<BetEvent>> events;
 		Dictionary<EBookmakers, BaseHttpRequest> httpClients;
 		Queue<BetEvent> changes;
@@ -24,10 +23,6 @@ namespace ForkBro.Controller.Event
 		{
 			events = new Dictionary<EBookmakers, List<BetEvent>>();
 			changes = new Queue<BetEvent>();
-			EBookmakers[] emptyBookmakers = new EBookmakers[0];
-			bookmakers = emptyBookmakers;
-			//foreach (var bm in emptyBookmakers)
-			//		events.Add(bm, new List<BetEvent>());
 
 		}
 		public void UpdateBookmakers(EBookmakers[] bookmakers)
@@ -46,8 +41,6 @@ namespace ForkBro.Controller.Event
 			httpClients = new Dictionary<EBookmakers, BaseHttpRequest>();
 			foreach (var bm in events)
 				httpClients[bm.Key] = BaseHttpRequest.GetHttpRequest(bm.Key);
-
-			this.bookmakers = bookmakers;
 		}
 		void GetEventChanges(EBookmakers bookmaker)
 		{
@@ -93,7 +86,7 @@ namespace ForkBro.Controller.Event
 			while (((IWorker)this).IsWork)
 				try
 				{
-					await Task.Run(() => Parallel.ForEach(bookmakers, x => GetEventChanges(x)));
+					await Task.Run(() => Parallel.ForEach(httpClients.Keys, x => GetEventChanges(x)));
 				}
 				catch (Exception ex)
 				{

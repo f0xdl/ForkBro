@@ -1,6 +1,7 @@
 ﻿using ForkBro.Configuration;
 using ForkBro.Controller;
 using ForkBro.Controller.Event;
+using ForkBro.Controller.Hub;
 using ForkBro.Controller.Scanner;
 using ForkBro.Model;
 using ForkBro.Model.EventModel;
@@ -26,37 +27,23 @@ namespace ForkBro
                 confManager.WriteConfig();
             }
             confManager.ReadConfig();
-            ref Config config = ref confManager.GetConfig();
 
-            //DEBUG
+            #region Config Debug
+            ref Config config = ref confManager.CurrConfig;
             config.eventsUpdate = Convert.ToInt32(TimeSpan.FromSeconds(1).TotalMilliseconds) * 10;
-            config.companies = new CompanyProp[] {
-                new CompanyProp() { companyID = EBookmakers._1xbet, enable = true, mapRepeat = 1000 },
-                new CompanyProp() { companyID = EBookmakers._favbet, enable = true, mapRepeat = 1000 }
+            config.companies = new BookmakersProp[] {
+                new BookmakersProp() { companyID = EBookmakers._1xbet, enable = true, mapRepeat = 1000 },
+                new BookmakersProp() { companyID = EBookmakers._favbet, enable = true, mapRepeat = 1000 }
                 };
-            //END DEBUG
+            #endregion Debug
             #endregion
 
-            #region EventManager
-            BetEventScanner eventManager = new BetEventScanner();
+            HubManager manager = new HubManager();
+            manager.UpdateBookmakers(config.companies);
+            manager.Start(config.eventsUpdate, config.companies);
 
-            eventManager.UpdateBookmakers(config.GetEBookmakers());
-            eventManager.ScannerStart(config.eventsUpdate);
-            #endregion
 
-            #region BookmakerScanner
-            Dictionary<EBookmakers, BookmakerScanner> scanners = new Dictionary<EBookmakers, BookmakerScanner>();
-            foreach (CompanyProp company in config.companies)
-            {
-                //Настройки сканера
-                BookmakerScanner bookmakerScanner = new BookmakerScanner();
-                bookmakerScanner.SetScanner(company.companyID);
-                bookmakerScanner.Start(company.mapRepeat);
 
-                //Добавление сканера в словать 
-                scanners.Add(company.companyID, bookmakerScanner);
-            }
-            #endregion
         }
     }
 }

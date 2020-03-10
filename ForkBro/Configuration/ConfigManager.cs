@@ -19,11 +19,11 @@ namespace ForkBro.Configuration
         }
 
         public ConfigManager GetInstance() => manager;
-        internal ref Config GetConfig() => ref config;
-        internal Config CreateConfig() => config = Config.Empty;
-        internal bool FileExists { get => File.Exists(path); }
+        public ref Config CurrConfig => ref config;
+        public Config CreateConfig() => config = Config.Empty;
+        public bool FileExists { get => File.Exists(path); }
 
-        internal bool ReadConfig()
+        public bool ReadConfig()
         {
             bool result = false;
             try
@@ -35,7 +35,7 @@ namespace ForkBro.Configuration
             catch { }
             return result;
         }
-        internal bool WriteConfig()
+        public bool WriteConfig()
         {
             bool result = false;
                 try

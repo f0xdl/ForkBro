@@ -12,10 +12,10 @@ namespace ForkBro.Configuration
         [JsonProperty(Order = 0)]
         public int eventsUpdate; //Период обновление списка игр на букмекерах 
         [JsonProperty(Order = 1)]
-        public CompanyProp[] companies;
+        public BookmakersProp[] companies;
 
         public static Config Empty => new Config() {
-            companies = new CompanyProp[0],
+            companies = new BookmakersProp[0],
             eventsUpdate = 300000
         };
         public EBookmakers[] GetEBookmakers()
@@ -31,7 +31,7 @@ namespace ForkBro.Configuration
         }
     }
 
-    public struct CompanyProp
+    public struct BookmakersProp
     {
         [JsonProperty(Order = 0)]
         public EBookmakers companyID;
@@ -39,8 +39,10 @@ namespace ForkBro.Configuration
         public bool enable;
         [JsonProperty(PropertyName = "Refresh Coef", Order = 2)]
         public int mapRepeat;
+        [JsonProperty(PropertyName = "Max event count", Order = 2)]
+        public int maxEvents;
 
-        public static CompanyProp Empty => new CompanyProp()
+        public static BookmakersProp Empty => new BookmakersProp()
         {
             companyID = 0,
             enable = false,
