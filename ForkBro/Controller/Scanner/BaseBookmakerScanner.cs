@@ -10,19 +10,20 @@ using System.Threading.Tasks;
 
 namespace ForkBro.Controller.Scanner
 {
-	public class BookmakerScanner : IWorker,IBookmakerScanner
+	public class BookmakerScanner : IWorker
 	{
-		//private HttpClient client;
-		private Dictionary<int, IGame> games;
+		public IBookmakerEvent[] events;
 		IBookmakerScanner scanner;
+		object idEventsLock;
+		private Func<int> eventId;
 
 		//IBookmakerScanner
 		//BaseHttpRequest IBookmakerScanner.httpClient { get; set; }
 		//TODO реализовать интерфейс IBookmakerScanner для favbet
 
-		public BookmakerScanner()
+		public BookmakerScanner(int countEvents = 100)
 		{
-			games = new Dictionary<int, IGame>();
+			events = new IBookmakerEvent[countEvents];
 		}
 		public void SetScanner(EBookmakers item)
 		{
@@ -37,15 +38,41 @@ namespace ForkBro.Controller.Scanner
 		}
 		void UpdateGameData(int key) { throw new System.Exception("Not implemented"); }
 
-		//Game operation
-		public bool GameExists(BetEvent betEvent) => games.Where(x => betEvent.id == x.Value.EventID).Count() > 0;//TODO Check result
-		public long AddGame(BetEvent betEvent)
+		//Bookmaker event operation
+		int GetEventID()
 		{
-			throw new System.Exception("Not implemented");
+			int id;
+			lock (idEventsLock)
+				try
+				{
+					id = Array.FindIndex(events, x => x.status == EStatusEvent.Undefined || x.status == EStatusEvent.Over);
+				}
+				catch (ArgumentNullException) { 
+					throw new Exception("Список событий в сканере переполнен![" + scanner.BookmakerName + "]");
+				}
+			return id;
+		}//Получить свободный элемент в массиве
+		public bool GameExists(int betEventId) => events.Count(x => betEventId == x.EventID) > 0;//TODO Check result
+		public ref IBookmakerEvent AddEvent(int idBetEvent)
+		{
+			int eventId;
+
+			if (!GameExists(idBetEvent))
+			{
+				eventId = GetEventID();
+				IBookmakerEvent _event = scanner.newEvent();
+				_event.EventID = idBetEvent;
+				events[eventId] = _event; 
+			}
+			else
+				throw new Exception("Данное событие уже существует!");
+
+			return ref events[eventId]; //возвращаем ссылку на ивент при удачном добавлении элемента
 		}
-		public long RemoveGame(BetEvent betEvent)
+		public void RemoveEvent(int idBetEvent)
 		{
-			throw new System.Exception("Not implemented");
+			foreach (var item in events.Where(x => x.EventID == idBetEvent))
+				item.status = EStatusEvent.Over;
 		}
 
 
@@ -60,7 +87,7 @@ namespace ForkBro.Controller.Scanner
 			while (((IWorker)this).IsWork)
 				try
 				{
-					await Task.Run(() => Parallel.ForEach(games, x => UpdateGameData(x.Key)));
+					await Task.Run(() => Parallel.ForEach(events, x => UpdateGameData(x.EventID)));
 				}
 				catch (Exception ex)
 				{

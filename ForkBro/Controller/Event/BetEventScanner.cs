@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace ForkBro.Controller.Event
 {
 
-	public class BetEventManager : IWorker
+	public class BetEventScanner : IWorker
 	{
 		EBookmakers[] bookmakers;
 		Dictionary<EBookmakers, List<BetEvent>> events;
@@ -20,7 +20,7 @@ namespace ForkBro.Controller.Event
 		Queue<BetEvent> changes;
 
 		//Manager methods
-		public BetEventManager()
+		public BetEventScanner()
 		{
 			events = new Dictionary<EBookmakers, List<BetEvent>>();
 			changes = new Queue<BetEvent>();
@@ -109,7 +109,7 @@ namespace ForkBro.Controller.Event
 		public BetEvent GetNextEvent() => changes.Dequeue();
 		void AddEvent(BetEvent ev)
 		{
-			ev.status = EStatusEvent.Active;
+			ev.status = EStatusEvent.New;
 			for (int i = 0; i < events[ev.bookmaker].Count; i++)
 				if (events[ev.bookmaker][i].id == ev.id)
 				{

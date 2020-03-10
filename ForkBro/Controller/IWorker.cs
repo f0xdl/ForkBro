@@ -9,7 +9,7 @@ namespace ForkBro.Controller
     {
         bool IsWork { get; set; }
         protected Thread thread { get; set; }
-
+        
         abstract void Work(object delay);
         public bool StartWork(int delay,string customName=null)
         {
