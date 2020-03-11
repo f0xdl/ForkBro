@@ -32,9 +32,9 @@ namespace ForkBro.Controller.Event.BetEvents
         //public string tournament_name { get; set; }
         //public int tournament_weigh { get; set; }
 
-        public BetEvent ConvertToBetEvent()
+        public EventPool ConvertToBetEvent()
         {
-            BetEvent betEvent = new BetEvent();
+            EventPool betEvent = new EventPool();
             betEvent.id = event_id;
             switch (sport_name)
             {

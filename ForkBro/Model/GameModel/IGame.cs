@@ -1,7 +1,8 @@
 ﻿using ForkBro.Model;
 
-public interface IBookmakerEvent
+public struct BookmakerEvent
 {
-    public int EventID { get; set; }
-    public EStatusEvent status { get; set; }
+    public int EventID;
+    public readonly EBookmakers bookmaker;
+    public EStatusEvent status;
 }

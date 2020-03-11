@@ -11,7 +11,7 @@ namespace ForkBro.Controller
         protected Thread thread { get; set; }
         
         abstract void Work(object delay);
-        public bool StartWork(int delay,string customName=null)
+        public bool StartWork(int delay,string customName = null)
         {
             bool result = false;
             try

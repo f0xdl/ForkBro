@@ -8,9 +8,9 @@ namespace ForkBro.Controller.Client
 {
     public class HttpRequest_1xbet : BaseHttpRequest
     {
-        public override List<BetEvent> GetListEvent()
+        public override List<EventPool> GetListEvent()
         {
-            List<BetEvent> events = new List<BetEvent>();
+            List<EventPool> events = new List<EventPool>();
             //sports=3&
             var httpResult = GetAsync(@"https://xparibet.com/LiveFeed/Get1x2_VZip", "count=500&mode=8").Result;
             var jsonData = Newtonsoft.Json.JsonConvert.DeserializeObject<GameList_1xBet>(httpResult);
@@ -20,7 +20,7 @@ namespace ForkBro.Controller.Client
             {
                 foreach (var item in jsonData.events)
                 {
-                    BetEvent betEvent = item.ConvertToBetEvent();
+                    EventPool betEvent = item.ConvertToBetEvent();
                     betEvent.bookmaker = EBookmakers._1xbet;
 
                     //Добавить событие только если оно активно и выбран спорт

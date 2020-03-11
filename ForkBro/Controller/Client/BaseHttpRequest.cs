@@ -31,7 +31,7 @@ namespace ForkBro.Controller.Client
             return request;
         }
 
-        public abstract List<BetEvent> GetListEvent();
+        public abstract List<EventPool> GetListEvent();
 
         public async Task<string> GetAsync(string Url, string Data)
         {
@@ -66,7 +66,7 @@ namespace ForkBro.Controller.Client
 
     public class HttpRequest_template : BaseHttpRequest
     {
-        public override List<BetEvent> GetListEvent()
+        public override List<EventPool> GetListEvent()
         {
             throw new System.NotImplementedException();
         }

@@ -65,9 +65,9 @@ namespace ForkBro.Controller.Event.BetEvents
         //public int? VA { get; set; }
         //public string VI { get; set; }
 
-        public BetEvent ConvertToBetEvent()
+        public EventPool ConvertToBetEvent()
         {
-            BetEvent betEvent = new BetEvent();
+            EventPool betEvent = new EventPool();
             betEvent.id = I;
             switch(SE)
             {

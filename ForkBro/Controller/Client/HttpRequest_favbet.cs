@@ -8,9 +8,9 @@ namespace ForkBro.Controller.Client
 {
     public class HttpRequest_favbet : BaseHttpRequest
     {
-        public override List<BetEvent> GetListEvent()
+        public override List<EventPool> GetListEvent()
         {
-            List<BetEvent> events = new List<BetEvent>();
+            List<EventPool> events = new List<EventPool>();
             var httpResult = PostAsync(@"https://www.favbet.com/frontend_api/events_short/", 
                                         "{\"lang\":\"en\",\"service_id\":1}"
                                         , "application/json"
@@ -23,7 +23,7 @@ namespace ForkBro.Controller.Client
             {
                 foreach (var item in jsonData.events)
                 {
-                    BetEvent betEvent = item.ConvertToBetEvent();
+                    EventPool betEvent = item.ConvertToBetEvent();
                     betEvent.bookmaker = EBookmakers._favbet;
 
                     //Добавить событие только если оно активно и выбран спорт

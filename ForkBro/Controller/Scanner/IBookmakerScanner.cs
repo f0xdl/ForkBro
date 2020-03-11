@@ -7,6 +7,6 @@ namespace ForkBro.Controller.Scanner
     {
         EBookmakers BookmakerName { get; set; }
         //BaseHttpRequest httpClient { get; set; }
-        IBookmakerEvent newEvent();
+        BookmakerEvent newEvent();
     }
 }

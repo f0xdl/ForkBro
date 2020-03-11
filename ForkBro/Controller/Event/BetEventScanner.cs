@@ -14,15 +14,15 @@ namespace ForkBro.Controller.Event
 
 	public class BetEventScanner : IWorker
 	{
-		Dictionary<EBookmakers, List<BetEvent>> events;
+		Dictionary<EBookmakers, List<EventPool>> events;
 		Dictionary<EBookmakers, BaseHttpRequest> httpClients;
-		Queue<BetEvent> changes;
+		Queue<EventPool> changes;
 
 		//Manager methods
 		public BetEventScanner()
 		{
-			events = new Dictionary<EBookmakers, List<BetEvent>>();
-			changes = new Queue<BetEvent>();
+			events = new Dictionary<EBookmakers, List<EventPool>>();
+			changes = new Queue<EventPool>();
 
 		}
 		public void UpdateBookmakers(EBookmakers[] bookmakers)
@@ -35,7 +35,7 @@ namespace ForkBro.Controller.Event
 			//Добавление новых букмекеров
 			foreach (EBookmakers bm in bookmakers)
 				if (!events.ContainsKey(bm))
-					events.Add(bm, new List<BetEvent>());
+					events.Add(bm, new List<EventPool>());
 
 			//Добавление парсеров
 			httpClients = new Dictionary<EBookmakers, BaseHttpRequest>();
@@ -47,7 +47,7 @@ namespace ForkBro.Controller.Event
 			try
 			{
 				//Выполнить запрос онлайн событий на букмекере
-				List<BetEvent> newBetEvents = httpClients[bookmaker].GetListEvent();
+				List<EventPool> newBetEvents = httpClients[bookmaker].GetListEvent();
 
 				//Клонирование текущего списка событий и установка флага обновления
 				events[bookmaker].ForEach(x => x.updated = false);
@@ -99,8 +99,8 @@ namespace ForkBro.Controller.Event
 		}
 
 		//Event action
-		public BetEvent GetNextEvent() => changes.Dequeue();
-		void AddEvent(BetEvent ev)
+		public EventPool GetNextEvent() => changes.Dequeue();
+		void AddEvent(EventPool ev)
 		{
 			ev.status = EStatusEvent.New;
 			for (int i = 0; i < events[ev.bookmaker].Count; i++)
@@ -119,7 +119,7 @@ namespace ForkBro.Controller.Event
 
 			changes.Enqueue(ev);
 		}
-		void CloseEvent(BetEvent ev)
+		void CloseEvent(EventPool ev)
 		{
 			//Подстановка даты закрытия при отсутствии
 			//if (ev.dtEnd == null)

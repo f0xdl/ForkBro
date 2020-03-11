@@ -2,7 +2,7 @@
 {
     internal class Scanner_1xbet : IBookmakerScanner
     {
-        public IBookmakerEvent newEvent()
+        public BookmakerEvent newEvent()
         {
             throw new System.NotImplementedException();
         }

@@ -12,7 +12,7 @@ namespace ForkBro.Controller.Scanner
 {
 	public class BookmakerClient : IWorker
 	{
-		public IBookmakerEvent[] events;
+		public BookmakerEvent[] events;
 		IBookmakerScanner scanner;
 		object idEventsLock;
 		private Func<int> eventId;
@@ -29,7 +29,7 @@ namespace ForkBro.Controller.Scanner
 			if (maxEvents == 0)
 				throw new Exception("Некорректно заданно максимальное количество событий у букмекера " + bookmaker);
 			
-			events = new IBookmakerEvent[maxEvents];
+			events = new BookmakerEvent[maxEvents];
 		}
 		IBookmakerScanner SetScanner(EBookmakers item)
 		{
@@ -59,14 +59,14 @@ namespace ForkBro.Controller.Scanner
 			return id;
 		}//Получить свободный элемент в массиве
 		public bool GameExists(int betEventId) => events.Count(x => betEventId == x.EventID) > 0;//TODO Check result
-		public ref IBookmakerEvent AddEvent(int idBetEvent)
+		public ref BookmakerEvent AddEvent(int idBetEvent)
 		{
 			int eventId;
 
 			if (!GameExists(idBetEvent))
 			{
 				eventId = GetEventID();
-				IBookmakerEvent _event = scanner.newEvent();
+				BookmakerEvent _event = scanner.newEvent();
 				_event.EventID = idBetEvent;
 				events[eventId] = _event; 
 			}
@@ -85,7 +85,6 @@ namespace ForkBro.Controller.Scanner
 		//IWorker
 		bool IWorker.IsWork { get; set; }
 		Thread IWorker.thread { get; set; }
-
 		public void Start(int updatePeriod = -1) => ((IWorker)this).StartWork(updatePeriod == -1? UpdatePeriod: updatePeriod);
 		public void Stop(int ms_wait) => ((IWorker)this).StopWork(ms_wait);
 		async void IWorker.Work(object delay)
@@ -104,5 +103,7 @@ namespace ForkBro.Controller.Scanner
 					Thread.Sleep(TimeSpan.FromMilliseconds((int)delay));
 				}
 		}
+
+		public bool WorkStatus() => ((IWorker)this).IsWork;
 	}
 }

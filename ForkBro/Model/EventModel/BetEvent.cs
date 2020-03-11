@@ -1,17 +1,19 @@
 using System;
+using System.Linq;
+
 namespace ForkBro.Model.EventModel
 {
-	public class BetEvent
+	public class EventPool
 	{
-		public int id;
+		public long id;
 		public EBookmakers bookmaker;
 		public ESport sport;
 		public EBetType betType;
 		public Command[] commands;
-		//public DateTime dtStart;
-		//public DateTime dtEnd;
 		public bool updated;
 		public EStatusEvent status;
+		public BookmakerEvent[] events;
 
+		public bool BookmakerHasUpdate => events.Count(x => x.status == EStatusEvent.Updated) > 0;
 	}
 }
