@@ -12,6 +12,8 @@ namespace ForkBro.Configuration
         [JsonProperty(Order = 0)]
         public int eventsUpdate; //Период обновление списка игр на букмекерах 
         [JsonProperty(Order = 1)]
+        public int maxHubEvents;
+        [JsonProperty(Order = 2)]
         public BookmakersProp[] companies;
 
         public static Config Empty => new Config() {

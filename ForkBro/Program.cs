@@ -38,7 +38,7 @@ namespace ForkBro
             #endregion Debug
             #endregion
 
-            HubManager manager = new HubManager();
+            HubManager manager = new HubManager(config.maxHubEvents);
             manager.UpdateBookmakers(config.companies);
             manager.Start(config.eventsUpdate, config.companies);
 
