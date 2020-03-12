@@ -2,8 +2,7 @@
 using ForkBro.Controller.Event;
 using ForkBro.Controller.Scanner;
 using ForkBro.Model;
-using ForkBro.Model.EventModel;
-using ForkBro.Model.Manager;
+using ForkBro.Model.HubModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,18 +14,18 @@ namespace ForkBro.Controller.Hub
 {
     class HubManager : IWorker
     {
-        EBookmakers[] bookmakers;
+        Bookmaker[] bookmakers;
 
         BetEventScanner onlineScanner;
-        Dictionary<EBookmakers, BookmakerClient> scanners;
+        Dictionary<Bookmaker, BookmakerClient> scanners;
         EventHub Hub;
 
         public HubManager(BookmakersProp[] companies)
         {
             Hub = new EventHub(bookmakers);
-            bookmakers = new EBookmakers[0];
+            bookmakers = new Bookmaker[0];
             onlineScanner = new BetEventScanner();
-            scanners = new Dictionary<EBookmakers, BookmakerClient>();
+            scanners = new Dictionary<Bookmaker, BookmakerClient>();
         }
         public void UpdateBookmakers(BookmakersProp[] companies)
         {

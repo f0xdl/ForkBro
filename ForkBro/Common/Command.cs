@@ -1,5 +1,5 @@
 using System;
-namespace ForkBro.Model.EventModel
+namespace ForkBro.Model
 {
 	public struct Command
 	{

@@ -20,11 +20,11 @@ namespace ForkBro.Configuration
             companies = new BookmakersProp[0],
             eventsUpdate = 300000
         };
-        public EBookmakers[] GetEBookmakers()
+        public Bookmaker[] GetEBookmakers()
         {
-            EBookmakers[] bookmakers;
+            Bookmaker[] bookmakers;
             if (companies == null)
-                bookmakers = new EBookmakers[0];
+                bookmakers = new Bookmaker[0];
             else
                 bookmakers = companies.Where(x => x.enable)
                                       .Select(x => x.companyID)
@@ -36,7 +36,7 @@ namespace ForkBro.Configuration
     public struct BookmakersProp
     {
         [JsonProperty(Order = 0)]
-        public EBookmakers companyID;
+        public Bookmaker companyID;
         [JsonProperty(Order = 1)]
         public bool enable;
         [JsonProperty(PropertyName = "Refresh Coef", Order = 2)]

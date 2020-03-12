@@ -65,16 +65,16 @@ namespace ForkBro.Controller.Event.BetEvents
         //public int? VA { get; set; }
         //public string VI { get; set; }
 
-        public EventPool ConvertToBetEvent()
+        public Model.EventModel.BetEvent ConvertToBetEvent()
         {
-            EventPool betEvent = new EventPool();
+            Model.EventModel.BetEvent betEvent = new Model.EventModel.BetEvent();
             betEvent.id = I;
             switch(SE)
             {
                 //case "Football":
                 //    betEvent.sport = ESport.Football; break;
                 case "Basketball":
-                    betEvent.sport = ESport.Basketball; break;
+                    betEvent.sport = Sport.Basketball; break;
                 //case "Ice Hockey":
                 //    betEvent.sport = ESport.Hockey; break;                
                 //case "Volleyball":
@@ -86,9 +86,9 @@ namespace ForkBro.Controller.Event.BetEvents
                 //case "Table Tennis":
                 //    betEvent.sport = ESport.TableTennis; break;
                 case "Tennis":
-                    betEvent.sport = ESport.Tennis; break;
+                    betEvent.sport = Sport.Tennis; break;
                 default:
-                    betEvent.sport = ESport.None; break;
+                    betEvent.sport = Sport.None; break;
             }//Определение вида спорта
 
             Command commandA = new Command()

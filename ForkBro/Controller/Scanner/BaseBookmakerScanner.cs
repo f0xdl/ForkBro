@@ -22,7 +22,7 @@ namespace ForkBro.Controller.Scanner
 		//BaseHttpRequest IBookmakerScanner.httpClient { get; set; }
 		//TODO реализовать интерфейс IBookmakerScanner для favbet
 
-		public BookmakerClient(EBookmakers bookmaker, int maxEvents)
+		public BookmakerClient(Bookmaker bookmaker, int maxEvents)
 		{
 			scanner = SetScanner(bookmaker);
 
@@ -31,13 +31,13 @@ namespace ForkBro.Controller.Scanner
 			
 			events = new BookmakerEvent[maxEvents];
 		}
-		IBookmakerScanner SetScanner(EBookmakers item)
+		IBookmakerScanner SetScanner(Bookmaker item)
 		{
 			switch (item)
 			{
-				case EBookmakers._1xbet:
+				case Bookmaker._1xbet:
 					return new Scanner_1xbet();
-				case EBookmakers._favbet:
+				case Bookmaker._favbet:
 					return new Scanner_1xbet(); 
 				default: throw new Exception("Данный сканер не определён в BookmakerClient");
 			}
@@ -51,7 +51,7 @@ namespace ForkBro.Controller.Scanner
 			lock (idEventsLock)
 				try
 				{
-					id = Array.FindIndex(events, x => x.status == EStatusEvent.Undefined || x.status == EStatusEvent.Over);
+					id = Array.FindIndex(events, x => x.status == StatusEvent.Undefined || x.status == StatusEvent.Over);
 				}
 				catch (ArgumentNullException) { 
 					throw new Exception("Список событий в сканере переполнен![" + scanner.BookmakerName + "]");
@@ -78,7 +78,7 @@ namespace ForkBro.Controller.Scanner
 		public void RemoveEvent(int idBetEvent)
 		{
 			foreach (var item in events.Where(x => x.EventID == idBetEvent))
-				item.status = EStatusEvent.Over;
+				item.status = StatusEvent.Over;
 		}
 
 

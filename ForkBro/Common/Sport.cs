@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ForkBro.Model
 {
-    public enum ESport
+    public enum Sport
     {
         None = 0, // 0x00000000
         Football = 101, // 0x00000065

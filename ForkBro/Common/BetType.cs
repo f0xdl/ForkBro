@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ForkBro.Model
 {
-    public enum EBetType
+    public enum BetType
     {
         None = 0,
         Win = 1,

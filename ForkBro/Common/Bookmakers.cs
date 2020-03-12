@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ForkBro.Model
 {
-    public enum EBookmakers
+    public enum Bookmaker
     {
         _betcity = 1,
         _marathon = 2,

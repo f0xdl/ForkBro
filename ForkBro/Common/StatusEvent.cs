@@ -1,6 +1,6 @@
 ﻿namespace ForkBro.Model
 {
-    public enum EStatusEvent
+    public enum StatusEvent
     {
         Undefined = 0,
         New = 1,

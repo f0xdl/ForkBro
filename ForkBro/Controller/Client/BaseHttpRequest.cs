@@ -1,5 +1,6 @@
-﻿using ForkBro.Model;
-using ForkBro.Model.EventModel;
+﻿using ForkBro.Controller.Event;
+using ForkBro.Model;
+using ForkBro.Model.RefEventModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,15 +14,15 @@ namespace ForkBro.Controller.Client
     {
         public static BaseHttpRequest Empty => new HttpRequest_template();
 
-        public static BaseHttpRequest GetHttpRequest(EBookmakers bookmaker)
+        public static BaseHttpRequest GetHttpRequest(Bookmaker bookmaker)
         {
             BaseHttpRequest request;
             switch (bookmaker)
             {
-                case EBookmakers._1xbet:
+                case Bookmaker._1xbet:
                     request = new HttpRequest_1xbet();
                     break;
-                case EBookmakers._favbet:
+                case Bookmaker._favbet:
                     request = new HttpRequest_favbet();
                     break;
                 default:
@@ -31,7 +32,7 @@ namespace ForkBro.Controller.Client
             return request;
         }
 
-        public abstract List<EventPool> GetListEvent();
+        public abstract List<RefEvent> GetListEvent();
 
         public async Task<string> GetAsync(string Url, string Data)
         {
@@ -66,7 +67,7 @@ namespace ForkBro.Controller.Client
 
     public class HttpRequest_template : BaseHttpRequest
     {
-        public override List<EventPool> GetListEvent()
+        public override List<RefEvent> GetListEvent()
         {
             throw new System.NotImplementedException();
         }

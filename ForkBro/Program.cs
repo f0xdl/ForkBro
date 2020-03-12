@@ -32,8 +32,8 @@ namespace ForkBro
             ref Config config = ref confManager.CurrConfig;
             config.eventsUpdate = Convert.ToInt32(TimeSpan.FromSeconds(1).TotalMilliseconds) * 10;
             config.companies = new BookmakersProp[] {
-                new BookmakersProp() { companyID = EBookmakers._1xbet, enable = true, mapRepeat = 1000 },
-                new BookmakersProp() { companyID = EBookmakers._favbet, enable = true, mapRepeat = 1000 }
+                new BookmakersProp() { companyID = Bookmaker._1xbet, enable = true, mapRepeat = 1000 },
+                new BookmakersProp() { companyID = Bookmaker._favbet, enable = true, mapRepeat = 1000 }
                 };
             #endregion Debug
             #endregion
