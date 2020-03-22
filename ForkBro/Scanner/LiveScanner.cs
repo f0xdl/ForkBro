@@ -1,8 +1,7 @@
 ﻿using ForkBro.Common;
-using ForkBro.Common.Client;
+using ForkBro.Common.BookmakerClient;
 using ForkBro.Configuration;
 using ForkBro.Mediator;
-using ForkBro.OnlineScanner.EventLinks;
 using ForkBro.Scanner.EventLinks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -46,11 +45,8 @@ namespace ForkBro.Scanner
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            //Stopwatch stopwatch = new Stopwatch();
+            _logger.LogInformation("Start scan bookmakers at: {time}", DateTimeOffset.Now);
             while (!stoppingToken.IsCancellationRequested)
-            {
-                //stopwatch.Restart();
-                _logger.LogInformation("Start scan bookmakers at: {time}", DateTimeOffset.Now);
                 try
                 {
                     await Task.Run(() => Parallel.ForEach(httpClients, x => GetEventChanges(x)));
@@ -59,10 +55,11 @@ namespace ForkBro.Scanner
                 {
                     _logger.LogInformation(ex.ToString());
                 }
-                //stopwatch.Stop();
-                _logger.LogInformation("End scan bookmakers at: {time} (ElapsedMilliseconds:{int})", DateTimeOffset.Now, 0);
-                await Task.Delay(delay, stoppingToken);
-            }
+                finally
+                {
+                    await Task.Delay(delay, stoppingToken);
+                }
+            _logger.LogInformation("End scan bookmakers at: {time} (ElapsedMilliseconds:{int})", DateTimeOffset.Now, 0);
         }
 
         //Methods
@@ -74,25 +71,25 @@ namespace ForkBro.Scanner
                 List<IEventLink> newEventLinks = httpRequest.GetListEvent();
 
                 //Клонирование текущего списка событий и установка флага обновления
-                events[httpRequest.BM].ForEach(x => x.updated = false);
+                events[httpRequest.BM].ForEach(x => x.Updated = false);
 
                 //Удалить события, которых нет в текущей выборке
                 for (int i = 0; i < events[httpRequest.BM].Count; i++)
                 {
                     for (int n = 0; n < newEventLinks.Count; n++)
-                        if (newEventLinks[n].id == events[httpRequest.BM][i].id)
+                        if (newEventLinks[n].Id == events[httpRequest.BM][i].Id)
                         {
-                            //events[bookmaker][i].updated = true;
-                            //newEventLinks[n].updated = true;
+                            events[httpRequest.BM][i].Updated = true;
+                            newEventLinks[n].Updated = true;
                             break;
                         }
 
-                    if (!events[httpRequest.BM][i].updated)
+                    if (!events[httpRequest.BM][i].Updated)
                         CloseEvent(events[httpRequest.BM][i]);
                 }
                 //Добавить событие если его нет в старом списке
                 for (int n = 0; n < newEventLinks.Count; n++)
-                    if (!newEventLinks[n].updated)
+                    if (!newEventLinks[n].Updated)
                         AddEvent(newEventLinks[n]);
             }
             catch (Exception ex)
@@ -103,35 +100,35 @@ namespace ForkBro.Scanner
         //Event action
         void AddEvent(IEventLink ev)
         {
-            ev.status = StatusEvent.New;
-            for (int i = 0; i < events[ev.bookmaker].Count; i++)
-                if (events[ev.bookmaker][i].id == ev.id)
+            ev.Status = StatusEvent.New;
+            for (int i = 0; i < events[ev.Bookmaker].Count; i++)
+                if (events[ev.Bookmaker][i].Id == ev.Id)
                 {
-                    ev.updated = true;
-                    events[ev.bookmaker][i] = ev;
+                    ev.Updated = true;
+                    events[ev.Bookmaker][i] = ev;
                     break;
                 }
 
-            if (!ev.updated)
+            if (!ev.Updated)
             {
-                ev.updated = true;
-                events[ev.bookmaker].Add(ev);
+                ev.Updated = true;
+                events[ev.Bookmaker].Add(ev);
             }
             //Добавление события на букмекера
-            hub.AddEvent(ev.bookmaker, ev.sport, ev.id, ev.commandA.NameEng, ev.commandB.NameEng);
+            hub.EventEnqueue(ev);
         }
         void CloseEvent(IEventLink ev)
         {
             //Удаление из массива
-            ev.status = StatusEvent.Over;
-            for (int i = 0; i < events[ev.bookmaker].Count; i++)
-                if (events[ev.bookmaker][i].id == ev.id)
+            ev.Status = StatusEvent.Over;
+            for (int i = 0; i < events[ev.Bookmaker].Count; i++)
+                if (events[ev.Bookmaker][i].Id == ev.Id)
                 {
-                    events[ev.bookmaker].RemoveAt(i);
+                    events[ev.Bookmaker].RemoveAt(i);
                     break;
                 }
             //Удаление события
-            hub.OverEvent(ev.bookmaker, ev.id);
+            //hub.OverEvent(ev.Bookmaker, ev.Id);
         }
 
     }

@@ -1,10 +1,9 @@
 ﻿using ForkBro.Common;
-using ForkBro.OnlineScanner.EventLinks;
 using ForkBro.Scanner.EventLinks;
 using System.Collections.Generic;
 using System.IO;
 
-namespace ForkBro.Common.Client
+namespace ForkBro.Common.BookmakerClient
 {
     public class HttpRequest_favbet : BaseHttpRequest
     {
@@ -24,10 +23,10 @@ namespace ForkBro.Common.Client
                 foreach (var item in jsonData.events)
                 {
                     IEventLink betEvent = item;
-                    betEvent.bookmaker = Bookmaker._favbet;
+                    betEvent.Bookmaker = Bookmaker._favbet;
 
                     //Добавить событие только если оно активно и выбран спорт
-                    if (betEvent.sport != Sport.None && betEvent.status != StatusEvent.Over)
+                    if (betEvent.Sport != Sport.None && betEvent.Status != StatusEvent.Over)
                         events.Add(betEvent);
                 }
             }

@@ -1,4 +1,4 @@
-﻿namespace ForkBro.OnlineScanner.EventLinks
+﻿namespace ForkBro.Scanner
 {
     public struct Command
     {

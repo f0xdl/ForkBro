@@ -29,7 +29,8 @@ namespace ForkBro
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                foreach (var item in hub.GetLastUpdate())
+                    _logger.LogInformation("{string} running at: {time}",item.Key.ToString(), item.Value);
                 await Task.Delay(1000, stoppingToken);
             }
         }

@@ -1,17 +1,16 @@
 ﻿using ForkBro.Common;
-using ForkBro.OnlineScanner.EventLinks;
 
 namespace ForkBro.Scanner.EventLinks
 {
     public interface IEventLink
     {
-        public Bookmaker bookmaker { get; set; }
-        public bool updated { get; set; }
-        public StatusEvent status { get; set; }
+        public Bookmaker Bookmaker { get; set; }
+        public bool Updated { get; set; }
+        public StatusEvent Status { get; set; }
 
-        public long id{ get; }
-        public Sport sport{ get; }
-        public Command commandA{ get; }
-        public Command commandB { get; }
+        public long Id{ get; }
+        public Sport Sport{ get; }
+        public Command CommandA{ get; }
+        public Command CommandB { get; }
     }
 }

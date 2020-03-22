@@ -13,35 +13,35 @@ namespace ForkBro.Controller.Scanner
 	public class BookmakerClient : IWorker
 	{
 		public BookmakerEvent[] events;
-		IBookmakerScanner scanner;
-		object idEventsLock;
+		//IBookmakerScanner scanner;
+		//object idEventsLock;
 		private Func<int> eventId;
-		public int UpdatePeriod { get; set; }
+		//public int UpdatePeriod { get; set; }
 
 		//IBookmakerScanner
 		//BaseHttpRequest IBookmakerScanner.httpClient { get; set; }
 		//TODO реализовать интерфейс IBookmakerScanner для favbet
 
-		public BookmakerClient(Bookmaker bookmaker, int maxEvents)
-		{
-			scanner = SetScanner(bookmaker);
+		//public BookmakerClient(Bookmaker bookmaker, int maxEvents)
+		//{
+			//scanner = SetScanner(bookmaker);
 
-			if (maxEvents == 0)
-				throw new Exception("Некорректно заданно максимальное количество событий у букмекера " + bookmaker);
+			//if (maxEvents == 0)
+				//throw new Exception("Некорректно заданно максимальное количество событий у букмекера " + bookmaker);
 			
-			events = new BookmakerEvent[maxEvents];
-		}
-		IBookmakerScanner SetScanner(Bookmaker item)
-		{
-			switch (item)
-			{
-				case Bookmaker._1xbet:
-					return new Scanner_1xbet();
-				case Bookmaker._favbet:
-					return new Scanner_1xbet(); 
-				default: throw new Exception("Данный сканер не определён в BookmakerClient");
-			}
-		}
+			//events = new BookmakerEvent[maxEvents];
+		//}
+		//IBookmakerScanner SetScanner(Bookmaker item)
+		//{
+		//	switch (item)
+		//	{
+		//		case Bookmaker._1xbet:
+		//			return new Scanner_1xbet();
+		//		case Bookmaker._favbet:
+		//			return new Scanner_1xbet(); 
+		//		default: throw new Exception("Данный сканер не определён в BookmakerClient");
+		//	}
+		//}
 		void UpdateGameData(int key) { throw new System.Exception("Not implemented"); }
 
 		//Bookmaker event operation
@@ -85,8 +85,8 @@ namespace ForkBro.Controller.Scanner
 		//IWorker
 		bool IWorker.IsWork { get; set; }
 		Thread IWorker.thread { get; set; }
-		public void Start(int updatePeriod = -1) => ((IWorker)this).StartWork(updatePeriod == -1? UpdatePeriod: updatePeriod);
-		public void Stop(int ms_wait) => ((IWorker)this).StopWork(ms_wait);
+		//public void Start(int updatePeriod = -1) => ((IWorker)this).StartWork(updatePeriod == -1? UpdatePeriod: updatePeriod);
+		//public void Stop(int ms_wait) => ((IWorker)this).StopWork(ms_wait);
 		async void IWorker.Work(object delay)
 		{
 			while (((IWorker)this).IsWork)
@@ -104,6 +104,6 @@ namespace ForkBro.Controller.Scanner
 				}
 		}
 
-		public bool WorkStatus() => ((IWorker)this).IsWork;
+		//public bool WorkStatus() => ((IWorker)this).IsWork;
 	}
 }

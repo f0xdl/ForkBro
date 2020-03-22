@@ -95,10 +95,10 @@ namespace ForkBro.Common
         _bwinRu = _netBet | _betfair_sport, // 0x00000167
         _pinnacleBeta = _redBet | _betfair_sport, // 0x00000172
 
-        _None = 99, // 0x00000063
-        _LiveScanner = 101, // 
-        _DaemonMaster = 102, // 
-        _Client = 103, //
+        None = 99, // 0x00000063
+        LiveScanner = 101, // 
+        DaemonMaster = 102, // 
+        Client = 103, //
 
     }
 }

@@ -1,20 +1,37 @@
+﻿using ForkBro.Bookmakers;
 using ForkBro.Common;
-using ForkBro.OnlineScanner.EventLinks;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ForkBro.Mediator
 {
-	public struct Pool
-	{
-		public long id;
-		public Bookmaker bookmaker;
-		public Sport sport;
-		public Command[] commands;
-		public bool updated;
-		public StatusEvent status;
-		public BookmakerEvent[] events;
+    public class PoolRaw 
+    {
+        //public long id { get; private set; }
+        EventProps props;
+        private Dictionary<Bookmaker, BookmakerEvent> snapshots;
+        public int CountUpdate { get; private set; }
 
-		public bool BookmakerHasUpdate => events.Count(x => x.status == StatusEvent.Updated) > 0;
-	}
+        public PoolRaw(EventProps props)
+        {
+            CountUpdate = 0;
+            snapshots = new Dictionary<Bookmaker, BookmakerEvent>();
+            this.props = props;
+        }
+        public void AddSnapshot(ref BookmakerEvent bookmakerEvent)
+        {
+            snapshots.Add(bookmakerEvent.bookmaker, bookmakerEvent);
+        }
+        public void RemoveSnapshot(Bookmaker bookmaker) => snapshots.Remove(bookmaker);
+        public void UpdateSnapshot(ref BookmakerEvent bookmakerEvent)
+        {
+            snapshots[bookmakerEvent.bookmaker] = bookmakerEvent;
+            CountUpdate++;
+        } 
+        public void GetUpdates() => CountUpdate = 0;
+
+        //public bool ExistsSnapshot(Bookmaker bookmaker) => snapshots.ContainsKey(bookmaker);
+        public bool? ExistsEvent(Bookmaker bookmaker, long id) => snapshots[bookmaker]?.EventId == id;
+    }
 }

@@ -1,4 +1,5 @@
-﻿using ForkBro.Mediator;
+﻿using ForkBro.Common;
+using ForkBro.Mediator;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;

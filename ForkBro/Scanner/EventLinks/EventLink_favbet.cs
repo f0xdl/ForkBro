@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using ForkBro.Common;
-using ForkBro.OnlineScanner.EventLinks;
 using Newtonsoft.Json;
 
 namespace ForkBro.Scanner.EventLinks
 {
     public class EventLink_favbet: IEventLink
     {
-        public Bookmaker bookmaker { get; set; }
-        public bool updated { get; set; }
-        public StatusEvent status { get; set; }
-        public long id => event_id;
-        public Sport sport
+        public Bookmaker Bookmaker { get; set; }
+        public bool Updated { get; set; }
+        public StatusEvent Status { get; set; }
+        public long Id => event_id;
+        public Sport Sport
         {
             get
             {
@@ -39,14 +38,14 @@ namespace ForkBro.Scanner.EventLinks
                 }//Определение вида спорта
             }
         }
-        public Command commandA => new Command()
+        public Command CommandA => new Command()
         {
             City = "",
             NameEng = event_name.Split(" - ")[0],
             Name = "",
             Id = 0
         };
-        public Command commandB => new Command()
+        public Command CommandB => new Command()
         {
             City = "",
             NameEng = event_name.Split(" - ")[1],

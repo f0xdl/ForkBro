@@ -1,4 +1,4 @@
-﻿namespace ForkBro.Daemons
+﻿namespace ForkBro.Common
 {
     internal class Fork
     {

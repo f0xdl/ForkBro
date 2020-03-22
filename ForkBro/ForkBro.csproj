@@ -10,8 +10,6 @@
     <Compile Remove="_Old\BookmakerModel\BookmakerEvent.cs" />
     <Compile Remove="_Old\BookmakerModel\IBookmakerScanner.cs" />
     <Compile Remove="_Old\BookmakerModel\Scanner_1xbet.cs" />
-    <Compile Remove="_Old\ConsolidationHub\EventHub.cs" />
-    <Compile Remove="_Old\ConsolidationHub\HubManager.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,8 +20,6 @@
     <None Include="_Old\BookmakerModel\BaseBookmakerScanner.cs" />
     <None Include="_Old\BookmakerModel\IBookmakerScanner.cs" />
     <None Include="_Old\BookmakerModel\Scanner_1xbet.cs" />
-    <None Include="_Old\ConsolidationHub\EventHub.cs" />
-    <None Include="_Old\ConsolidationHub\HubManager.cs" />
   </ItemGroup>
 
   <ItemGroup>

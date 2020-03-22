@@ -1,5 +1,4 @@
 ﻿using ForkBro.Common;
-using ForkBro.OnlineScanner.EventLinks;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ForkBro.Scanner.EventLinks;
 
-namespace ForkBro.Common.Client
+namespace ForkBro.Common.BookmakerClient
 {
     public abstract class BaseHttpRequest
     {

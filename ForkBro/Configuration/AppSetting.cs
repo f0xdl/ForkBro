@@ -8,29 +8,12 @@ using System.Linq;
 
 namespace ForkBro.Configuration
 {
-
-    public class BookmakersProp
-    {
-        public Bookmaker id { get; set; }
-        public bool enable { get; set; }
-        public int repeat { get; set; }
-    }
-
-
-    public interface ISetting
-    {
-        public int LiveScanRepeat { get; set; }
-        public int CountDaemon { get; set; }
-        public List<BookmakersProp> Companies { get; set; }
-
-        public Bookmaker[] GetEBookmakers();
-    }
-
     public class AppSettings : ISetting
     {
         public int LiveScanRepeat { get; set; }
         public int CountDaemon { get; set; }
         public List<BookmakersProp> Companies { get; set; }
+        public int CountPool { get; set; }
 
         public Bookmaker[] GetEBookmakers()
         {
