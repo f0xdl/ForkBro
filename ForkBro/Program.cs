@@ -1,49 +1,67 @@
-﻿using ForkBro.Configuration;
-using ForkBro.Controller;
-using ForkBro.Controller.Event;
-using ForkBro.Controller.Hub;
-using ForkBro.Controller.Scanner;
-using ForkBro.Model;
-using ForkBro.Model.EventModel;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
+using ForkBro.Configuration;
+using ForkBro.Bookmakers;
+using ForkBro.Configuration;
+using ForkBro.Daemons;
+using ForkBro.Mediator;
+using ForkBro.Scanner;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using ForkBro.Common;
 
 namespace ForkBro
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-
-            #region Config
-            ConfigManager confManager = new ConfigManager();
-
-
-            if (!confManager.FileExists)
-            {
-                confManager.CreateConfig();
-                confManager.WriteConfig();
-            }
-            confManager.ReadConfig();
-
-            #region Config Debug
-            ref Config config = ref confManager.CurrConfig;
-            config.eventsUpdate = Convert.ToInt32(TimeSpan.FromSeconds(1).TotalMilliseconds) * 10;
-            config.companies = new BookmakersProp[] {
-                new BookmakersProp() { companyID = Bookmaker._1xbet, enable = true, mapRepeat = 1000 },
-                new BookmakersProp() { companyID = Bookmaker._favbet, enable = true, mapRepeat = 1000 }
-                };
-            #endregion Debug
-            #endregion
-
-            HubManager manager = new HubManager(config.companies);
-            manager.UpdateBookmakers(config.companies);
-            manager.Start(config.eventsUpdate);
-
-
-
+            CreateHostBuilder(args).Build().Run();
         }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+                .ConfigureServices((hostContext, services) =>
+                {
+                    #region ISetting [HostBuilderContext]
+                    services.AddTransient<ISetting, AppSettings>();
+                    #endregion
+
+                    #region Mediator [ISetting]
+                    services.AddSingleton<HubMediator>();
+                    services.AddSingleton<IScannerMediator>(x => x.GetRequiredService<HubMediator>());
+                    services.AddSingleton<IBookmakerMediator>(x => x.GetRequiredService<HubMediator>());
+                    services.AddSingleton<IDaemonMasterMediator>(x => x.GetRequiredService<HubMediator>());
+                    services.AddSingleton<IApiMediator>(x => x.GetRequiredService<HubMediator>());
+                    #endregion
+
+                    #region LiveScanner [ILogger,IScannerMediator,ISetting]
+                    services.AddHostedService<LiveScanner>();
+                    #endregion
+
+                    //#region BookmakerService [ILogger,IBookmakerMediator]
+                    //foreach (var item in (new AppSettings(hostContext)).Companies)
+                    //    switch (item.id)
+                    //    {
+                    //        case Bookmaker._favbet://TODO
+                    //            services.AddHostedService<FavBetService>(); break;
+                    //        case Bookmaker._1xbet:
+                    //            services.AddHostedService<BookmakerService>(); break;
+                    //        default: throw new Exception("Неизвесный тип букмекера: " + item.id.ToString());
+                    //    }
+                    //#endregion
+
+                    #region DaemonMaster [ILogger,ICalcDaemonMediator]
+                    services.AddHostedService<DaemonMaster>();
+                    #endregion
+
+                    #region Worker [ILogger,HubMediator]
+                    services.AddHostedService<Worker>();
+                    #endregion
+                });
     }
 }

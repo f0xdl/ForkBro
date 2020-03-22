@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ForkBro": {
+      "commandName": "Project",
+      "environmentVariables": {
+        " DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

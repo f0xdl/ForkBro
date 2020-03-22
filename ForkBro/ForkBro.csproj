@@ -1,16 +1,39 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+	<UserSecretsId>dotnet-WorkerService1-51F8E5ED-2679-41E2-A7F1-37E89DAB4388</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="_Old\BookmakerModel\BaseBookmakerScanner.cs" />
+    <Compile Remove="_Old\BookmakerModel\BookmakerEvent.cs" />
+    <Compile Remove="_Old\BookmakerModel\IBookmakerScanner.cs" />
+    <Compile Remove="_Old\BookmakerModel\Scanner_1xbet.cs" />
+    <Compile Remove="_Old\ConsolidationHub\EventHub.cs" />
+    <Compile Remove="_Old\ConsolidationHub\HubManager.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="_Old\BookmakerModel\BookmakerEvent.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="_Old\BookmakerModel\BaseBookmakerScanner.cs" />
+    <None Include="_Old\BookmakerModel\IBookmakerScanner.cs" />
+    <None Include="_Old\BookmakerModel\Scanner_1xbet.cs" />
+    <None Include="_Old\ConsolidationHub\EventHub.cs" />
+    <None Include="_Old\ConsolidationHub\HubManager.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="СalculatorModel\" />
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
-
 </Project>
