@@ -14,6 +14,7 @@ namespace ForkBro.Configuration
         public int CountDaemon { get; set; }
         public List<BookmakersProp> Companies { get; set; }
         public int CountPool { get; set; }
+        public double MinQuality { get; set; }
 
         public Bookmaker[] GetEBookmakers()
         {

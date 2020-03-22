@@ -9,7 +9,7 @@ namespace ForkBro.Mediator
     public class PoolRaw 
     {
         //public long id { get; private set; }
-        EventProps props;
+        public EventProps props { get; private set; }
         private Dictionary<Bookmaker, BookmakerEvent> snapshots;
         public int CountUpdate { get; private set; }
 

@@ -7,5 +7,7 @@ namespace ForkBro.Bookmakers
         internal long EventId;
         internal StatusEvent status;
         internal Bookmaker bookmaker;
+        internal int poolId;
+        public bool reverse;
     }
 }

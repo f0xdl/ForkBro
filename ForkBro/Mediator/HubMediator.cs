@@ -29,7 +29,7 @@ namespace ForkBro.Mediator
         {
             statusServices = new Dictionary<Bookmaker, DateTime>();
             bookmakersDelay = new Dictionary<Bookmaker, int>();
-            hubManager = new HubManager(setting.CountPool);
+            hubManager = new HubManager(setting.CountPool,setting.MinQuality);
             Links = new ConcurrentQueue<IEventLink>();
 
             _logger = logger;
@@ -56,7 +56,7 @@ namespace ForkBro.Mediator
         public void EventEnqueue(IEventLink link)
         {
             Links.Enqueue(link);
-            _logger.LogDebug($"Enqueue: \r\n {link.Bookmaker}, {link.CommandA}, {link.CommandB}, {link.Sport}, {link.Id}");
+            _logger.LogDebug($"Enqueue: {link.Bookmaker}, {link.CommandA.NameEng}, {link.CommandB.NameEng}, {link.Sport}, {link.Id}");
         }
 
         public void UpdateScannerStatus() => statusServices[Bookmaker.LiveScanner] = DateTime.Now;
@@ -72,18 +72,18 @@ namespace ForkBro.Mediator
             //Если новое событие не относится к букмекеру
             return link;
         }
-        public int? TryAddEvent(IEventLink link, ref BookmakerEvent bookmakerEvent)
+        public void TryAddEvent(IEventLink link, ref BookmakerEvent bookmakerEvent)
         {
 
             // Событие уже существет
             if (hubManager.HasEventInPool(link.Bookmaker, link.Id))
-                return null;
+                return;
 
             //События не существует
             //Поиск события в Пуле
-            int? idPool = hubManager.FindEvent(link.Sport, link.CommandA, link.CommandB);//Поиск соответствия в pool
+            double quality = hubManager.CalculateFuzzyEvent(link.Sport, link.CommandA, link.CommandB, out int idPool, out bool reverse);//Поиск соответствия в pool
             //Добавление нового элемента Пула при отсутствии
-            if (!idPool.HasValue)
+            if (quality > 0)
                 idPool = hubManager.AddPoolRaw(new EventProps()
                 {
                     sport = link.Sport,
@@ -92,11 +92,12 @@ namespace ForkBro.Mediator
                     CommandA = link.CommandA,
                     CommandB = link.CommandB,
                 });
-
+            bookmakerEvent.poolId = idPool;
+            bookmakerEvent.reverse = reverse;
             //Добавление снимка в Пул
-            hubManager.AddSnapshot(idPool.Value, ref bookmakerEvent);
-            _logger.LogInformation($"Bookmaker {link.Bookmaker}, event ADD {link.Id}");
-            return idPool;
+            hubManager.AddSnapshot(idPool, ref bookmakerEvent);
+            _logger.LogInformation($"[quality={quality}] Bookmaker {link.Bookmaker}, event ADD {link.Id}");
+            return;
         }
         public void OverEvent(int idPool, Bookmaker bm)
         {
@@ -139,7 +140,7 @@ namespace ForkBro.Mediator
     public interface IBookmakerMediator
     {
         public IEventLink GetNewEvent(Bookmaker bookmaker);
-        public int? TryAddEvent(IEventLink link, ref BookmakerEvent bookmakerEvent);
+        public void TryAddEvent(IEventLink link, ref BookmakerEvent bookmakerEvent);
         public void OverEvent(int idPool, Bookmaker bm);
         public bool HaveNewEvent();
         public void UpdateSnapshot(int idPool, ref BookmakerEvent betEvent);

@@ -19,7 +19,7 @@ namespace ForkBro.Bookmakers
 
         protected internal override async void OnWork()
         {
-            throw new NotImplementedException();
+            //TODO throw new NotImplementedException();
         }
     }
 }
