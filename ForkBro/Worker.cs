@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ForkBro.Bookmakers;
+using ForkBro.BookmakerModel;
 using ForkBro.Configuration;
 using ForkBro.Daemons;
 using ForkBro.Mediator;
@@ -30,7 +30,7 @@ namespace ForkBro
             while (!stoppingToken.IsCancellationRequested)
             {
                 foreach (var item in hub.GetLastUpdate())
-                    _logger.LogInformation("{string} running at: {time}",item.Key.ToString(), item.Value);
+                    _logger.LogTrace("{string} running at: {time}",item.Key.ToString(), item.Value);
                 await Task.Delay(1000, stoppingToken);
             }
         }

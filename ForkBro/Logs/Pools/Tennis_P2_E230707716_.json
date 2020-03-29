@@ -1,0 +1,142 @@
+{
+  "props": {
+    "StartDT": "2020-03-29T21:03:17.1514598+03:00",
+    "OverDT": "0001-01-01T00:00:00",
+    "sport": 102,
+    "status": 1,
+    "CommandA": {
+      "Id": 0,
+      "City": "",
+      "NameEng": "Artem Osipov",
+      "Name": ""
+    },
+    "CommandB": {
+      "Id": 0,
+      "City": "",
+      "NameEng": "Vladislav Zaytsev",
+      "Name": ""
+    }
+  },
+  "GetAllSnapshot": [
+    {
+      "DtStart": "0001-01-01T00:00:00",
+      "DtOver": "0001-01-01T00:00:00",
+      "EventId": 25511591,
+      "PoolId": 2,
+      "Bookmaker": 16,
+      "Sport": 102,
+      "Status": 1,
+      "CommandA": {
+        "Id": 0,
+        "City": "",
+        "NameEng": "Artem Osipov",
+        "Name": ""
+      },
+      "CommandB": {
+        "Id": 0,
+        "City": "",
+        "NameEng": "Vladislav Zaytsev",
+        "Name": ""
+      },
+      "Reverse": false,
+      "DtUpdate": "2020-03-29T21:44:32.7707003+03:00",
+      "DtComparison": "2020-03-29T21:45:27.7219967+03:00",
+      "HasUpdate": false,
+      "AllOdds": {}
+    },
+    {
+      "DtStart": "0001-01-01T00:00:00",
+      "DtOver": "0001-01-01T00:00:00",
+      "EventId": 230707716,
+      "PoolId": 2,
+      "Bookmaker": 22,
+      "Sport": 102,
+      "Status": 1,
+      "CommandA": {
+        "Id": 3647229,
+        "City": null,
+        "NameEng": "Artem Osipov",
+        "Name": "Артем Осипов"
+      },
+      "CommandB": {
+        "Id": 3649205,
+        "City": null,
+        "NameEng": "Vladislav Zaytsev",
+        "Name": "Владислав Зайцев"
+      },
+      "Reverse": false,
+      "DtUpdate": "2020-03-29T21:45:26.9328989+03:00",
+      "DtComparison": "2020-03-29T21:45:27.7220002+03:00",
+      "HasUpdate": false,
+      "AllOdds": {
+        "Win": [
+          {
+            "Group": 7,
+            "Value": 0.0,
+            "Coef": 3.93
+          },
+          {
+            "Group": 8,
+            "Value": 0.0,
+            "Coef": 1.195
+          }
+        ],
+        "Total": [
+          {
+            "Group": 5,
+            "Value": 25.5,
+            "Coef": 1.73
+          },
+          {
+            "Group": 6,
+            "Value": 25.5,
+            "Coef": 2.035
+          },
+          {
+            "Group": 5,
+            "Value": 26.5,
+            "Coef": 1.82
+          },
+          {
+            "Group": 6,
+            "Value": 26.5,
+            "Coef": 1.9
+          }
+        ],
+        "Fora": [
+          {
+            "Group": 8,
+            "Value": -3.5,
+            "Coef": 2.21
+          },
+          {
+            "Group": 8,
+            "Value": -2.5,
+            "Coef": 1.565
+          },
+          {
+            "Group": 8,
+            "Value": -1.5,
+            "Coef": 1.384
+          },
+          {
+            "Group": 7,
+            "Value": 1.5,
+            "Coef": 2.885
+          },
+          {
+            "Group": 7,
+            "Value": 2.5,
+            "Coef": 2.325
+          },
+          {
+            "Group": 7,
+            "Value": 3.5,
+            "Coef": 1.608
+          }
+        ]
+      }
+    }
+  ],
+  "HasUpdate": false
+}

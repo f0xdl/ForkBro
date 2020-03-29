@@ -6,12 +6,15 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using ForkBro.Scanner.EventLinks;
+using ForkBro.BookmakerModel;
+using System.Collections.Concurrent;
+using ForkBro.BookmakerModel.BaseEvents;
 
 namespace ForkBro.Common.BookmakerClient
 {
     public abstract class BaseHttpRequest
     {
-        public Bookmaker BM { get; private set; }
+        public Bookmaker BM { get; protected internal set; }
 
         public static BaseHttpRequest GetHttpRequest(Bookmaker bookmaker)
         {
@@ -32,17 +35,19 @@ namespace ForkBro.Common.BookmakerClient
         }
 
         public abstract List<IEventLink> GetListEvent();
-
+        public abstract ConcurrentDictionary<OldBetType, BettingOdds[]> GetDictionaryOdds(long eventId, Sport sport);
+               
+        //Async Get/Post request
         public async Task<string> GetAsync(string Url, string Data)
         {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url + "?" + Data);
-                request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-                using (Stream stream = response.GetResponseStream())
-                using (StreamReader reader = new StreamReader(stream))
-                {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url + "?" + Data);
+            request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+            using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+            using (Stream stream = response.GetResponseStream())
+            using (StreamReader reader = new StreamReader(stream))
+            {
                 return await reader.ReadToEndAsync();
-                }
+            }
         }
         public async Task<string> PostAsync(string Url, string Data, string ContentType)
         {
@@ -62,5 +67,6 @@ namespace ForkBro.Common.BookmakerClient
             using (StreamReader reader = new StreamReader(stream))
                 return await reader.ReadToEndAsync();
         }
+
     }
 }

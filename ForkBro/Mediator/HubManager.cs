@@ -1,4 +1,4 @@
-﻿using ForkBro.Bookmakers;
+﻿using ForkBro.BookmakerModel;
 using ForkBro.Common;
 using ForkBro.Scanner;
 using SentencesFuzzyComparison;
@@ -38,15 +38,37 @@ namespace ForkBro.Mediator
             return id;
         }
         public void RemovePoolRaw(long index) => pool[index] = null;
-        public bool HasEventInPool(Bookmaker bookmaker, long id) => pool.Count(x => x.ExistsEvent(bookmaker, id) ?? false) > 1;
-
-        public void AddSnapshot(int idPool, ref BookmakerEvent bookmakerEvent) => pool[idPool].AddSnapshot(ref bookmakerEvent);
-        public void RemoveSnapsot(int idPool, Bookmaker bookmaker) => pool[idPool].RemoveSnapshot(bookmaker);
-        public void UpdateSnapshot(int idPool, ref BookmakerEvent bookmakerEvent) => pool[idPool].UpdateSnapshot(ref bookmakerEvent);
-        public PoolRaw GetNextSnapshots()
+        public int HasEventInPool(Bookmaker bookmaker, long id)
         {
-            int idPool = pool.Max(x => x.CountUpdate);
-            pool[idPool].GetUpdates();
+            for (int i = 0; i < pool.Length; i++)
+                if (pool[i]?.ExistsEvent(bookmaker, id) ?? false)
+                    return i;
+            return -1;
+        }
+        public BetEvent GetEvent(Bookmaker bookmaker, long idEvent) 
+        {
+            for (int i = 0; i < pool.Length; i++)
+                if (pool[i].ExistsEvent(bookmaker, idEvent))
+                    return pool[i].GetSnapshot(bookmaker);
+            return null;
+        }
+        public void AddSnapshot(int idPool, ref BetEvent bookmakerEvent) => pool[idPool].AddSnapshot(ref bookmakerEvent);
+        public void RemoveSnapsot(int idPool, Bookmaker bookmaker) => pool[idPool].RemoveSnapshot(bookmaker);
+        public void UpdateSnapshot(int idPool, ref BetEvent bookmakerEvent) => pool[idPool].UpdateSnapshot(ref bookmakerEvent);
+        public PoolRaw GetSnapshotsToComparison()
+        {
+            int idPool = -1;
+            for (int i = 0; i < pool.Length; i++)
+                if (pool[i] != null && pool[i].HasUpdate)
+                { 
+                    idPool = i;
+                    break;
+                }
+            
+            if (idPool == -1)
+                return null;
+
+            pool[idPool].UpdateDtComparison();
             return pool[idPool];
         }
 
@@ -59,19 +81,21 @@ namespace ForkBro.Mediator
         /// <returns></returns>
         public double CalculateFuzzyEvent(Sport sport, Command CommandA, Command CommandB, out int idPool, out bool reverse)
         {
-            FuzzyComparer fuzzyComparer = new FuzzyComparer(0.5, 0.45, 3, 2);
+            FuzzyComparer fuzzyComparer = new FuzzyComparer();
             string[] newEvent = new string[] { CommandA.NameEng, CommandB.NameEng };
             idPool = -1;
             reverse = false;
             double quality = 0;
-            
+            double maxQuality = 0;
             for (int i = 0; i < pool.Length; i++)
-                if (pool[i].props.sport == sport)
+                if (pool[i]?.props.sport == sport)
                 {
                     string[] inPool = new string[] { pool[i].props.CommandA.NameEng, pool[i].props.CommandB.NameEng };
                     quality += fuzzyComparer.CalculateFuzzyEqualValue(inPool[0], newEvent[0]);
                     quality += fuzzyComparer.CalculateFuzzyEqualValue(inPool[1], newEvent[1]);
                     quality /= 2;
+                    if (maxQuality < quality)
+                        maxQuality = quality;
                     if (quality > minQuality)
                     {
                         idPool = i;
@@ -83,6 +107,8 @@ namespace ForkBro.Mediator
                     quality += fuzzyComparer.CalculateFuzzyEqualValue(inPool[0], newEvent[0]);
                     quality += fuzzyComparer.CalculateFuzzyEqualValue(inPool[1], newEvent[1]);
                     quality /= 2;
+                    if (maxQuality < quality)
+                        maxQuality = quality;
                     if (quality > minQuality)
                     {
                         idPool = i;

@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 namespace ForkBro.Scanner.EventLinks
 {
 
-    public class EventLink_1xBet : IEventLink
+    public class EventLink_1xbet : IEventLink
     {
         public Bookmaker Bookmaker { get; set; }
         public bool Updated { get; set; }
@@ -54,6 +54,8 @@ namespace ForkBro.Scanner.EventLinks
             Id = O2I
         };
 
+        public EventLink_1xbet() => Bookmaker = Bookmaker._1xbet;
+
         public int I { get; set; }//ID матча
         public string L { get; set; }//Лига
         public string LE { get; set; }//Лига [Eng]
@@ -67,61 +69,12 @@ namespace ForkBro.Scanner.EventLinks
         public string O2E { get; set; } //Название [Eng]
         public int O2I { get; set; }    //ID команды?
         public string SE { get; set; } //Спорт
-
-
-        //public EventLink ConvertToBetEvent()
-        //{
-        //    //EventLink eventLink = new EventLink();
-        //    //eventLink.id = I;
-        //    //switch(SE)
-        //    //{
-        //    //    case "Football":
-        //    //        eventLink.sport = Sport.Football; break;
-        //    //    case "Basketball":
-        //    //        eventLink.sport = Sport.Basketball; break;
-        //    //    case "Ice Hockey":
-        //    //        eventLink.sport = Sport.Hockey; break;
-        //    //    case "Volleyball":
-        //    //        eventLink.sport = Sport.VoleyBall; break;
-        //    //    case "Handball":
-        //    //        eventLink.sport = Sport.Handball; break;
-        //    //    case "Baseball":
-        //    //        eventLink.sport = Sport.Baseball; break;
-        //    //    case "Table Tennis":
-        //    //        eventLink.sport = Sport.TableTennis; break;
-        //    //    case "Tennis":
-        //    //        eventLink.sport = Sport.Tennis; break;
-        //    //    default:
-        //    //        eventLink.sport = Sport.None; break;
-        //    //}//Определение вида спорта
-
-        //    //Command commandA = new Command()
-        //    //{
-        //    //    City = O1CT,
-        //    //    NameEng = O1E,
-        //    //    Name = O1,
-        //    //    Id = O1I
-        //    //};
-        //    //Command commandB = new Command()
-        //    //{
-        //    //    City = O2CT,
-        //    //    NameEng = O2E,
-        //    //    Name = O2,
-        //    //    Id = O2I
-        //    //};
-        //    //eventLink.commands = new Command[] { commandA, commandB };
-
-        //    //TODO определить завершённые игры
-        //    //betEvent.eventOver = true;
-
-        //    return eventLink;
-        //}
     }
 
     public class GameList_1xBet
     {
         public bool Success { get; set; }
         [JsonProperty("Value")]
-        public List<EventLink_1xBet> events { get; set; }
+        public List<EventLink_1xbet> events { get; set; }
     }
 }

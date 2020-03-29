@@ -1,0 +1,54 @@
+{
+  "id": 2379,
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "event_id": 25511046,
+      "market_has_param": false,
+      "market_id": 784270465,
+      "market_name": "Победа в матче",
+      "market_order": "00700001000100000000",
+      "market_suspend": true,
+      "market_template_id": 3,
+      "market_template_view_id": 1,
+      "market_template_view_schema": null,
+      "market_template_weigh": 10,
+      "outcomes": [
+        {
+          "outcome_coef": 1.47,
+          "outcome_id": 2041749025,
+          "outcome_name": "Абакар Джалилов",
+          "outcome_param": null,
+          "outcome_perc_stat": 100.0,
+          "outcome_short_name": "1",
+          "outcome_tag": null,
+          "outcome_tl_header_name": null,
+          "outcome_tl_left_name": null,
+          "outcome_type_id": 259,
+          "outcome_visible": true,
+          "participant_number": 1
+        },
+        {
+          "outcome_coef": 2.56,
+          "outcome_id": 2041749026,
+          "outcome_name": "Николай Широков",
+          "outcome_param": null,
+          "outcome_perc_stat": 0.0,
+          "outcome_short_name": "2",
+          "outcome_tag": null,
+          "outcome_tl_header_name": null,
+          "outcome_tl_left_name": null,
+          "outcome_type_id": 260,
+          "outcome_visible": true,
+          "participant_number": 2
+        }
+      ],
+      "result_type_id": 1,
+      "result_type_name": "Основное время",
+      "result_type_short_name": "ОВ",
+      "result_type_weigh": 1,
+      "service_id": 1,
+      "sport_id": 2
+    }
+  ]
+}

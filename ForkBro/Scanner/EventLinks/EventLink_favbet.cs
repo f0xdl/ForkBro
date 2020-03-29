@@ -53,6 +53,8 @@ namespace ForkBro.Scanner.EventLinks
             Id = 0
         };
 
+        public EventLink_favbet() => Bookmaker = Bookmaker._favbet;
+
         public int event_id { get; set; }
         public string event_name { get; set; }
         public string sport_name { get; set; }

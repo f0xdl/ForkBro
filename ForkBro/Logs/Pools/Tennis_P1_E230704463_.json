@@ -1,0 +1,142 @@
+{
+  "props": {
+    "StartDT": "2020-03-29T21:03:17.1479274+03:00",
+    "OverDT": "0001-01-01T00:00:00",
+    "sport": 102,
+    "status": 1,
+    "CommandA": {
+      "Id": 0,
+      "City": "",
+      "NameEng": "Anney Laska",
+      "Name": ""
+    },
+    "CommandB": {
+      "Id": 0,
+      "City": "",
+      "NameEng": "Nikita Starkou",
+      "Name": ""
+    }
+  },
+  "GetAllSnapshot": [
+    {
+      "DtStart": "0001-01-01T00:00:00",
+      "DtOver": "0001-01-01T00:00:00",
+      "EventId": 25511234,
+      "PoolId": 1,
+      "Bookmaker": 16,
+      "Sport": 102,
+      "Status": 1,
+      "CommandA": {
+        "Id": 0,
+        "City": "",
+        "NameEng": "Anney Laska",
+        "Name": ""
+      },
+      "CommandB": {
+        "Id": 0,
+        "City": "",
+        "NameEng": "Nikita Starkou",
+        "Name": ""
+      },
+      "Reverse": false,
+      "DtUpdate": "2020-03-29T21:44:32.7707003+03:00",
+      "DtComparison": "2020-03-29T21:45:27.7212752+03:00",
+      "HasUpdate": false,
+      "AllOdds": {}
+    },
+    {
+      "DtStart": "0001-01-01T00:00:00",
+      "DtOver": "0001-01-01T00:00:00",
+      "EventId": 230704463,
+      "PoolId": 1,
+      "Bookmaker": 22,
+      "Sport": 102,
+      "Status": 1,
+      "CommandA": {
+        "Id": 3568295,
+        "City": null,
+        "NameEng": "Anney Laska",
+        "Name": "Анней Ласка"
+      },
+      "CommandB": {
+        "Id": 2900199,
+        "City": null,
+        "NameEng": "Nikita Starkou",
+        "Name": "Никита Старков"
+      },
+      "Reverse": false,
+      "DtUpdate": "2020-03-29T21:45:26.9334468+03:00",
+      "DtComparison": "2020-03-29T21:45:27.7212823+03:00",
+      "HasUpdate": false,
+      "AllOdds": {
+        "Win": [
+          {
+            "Group": 7,
+            "Value": 0.0,
+            "Coef": 7.18
+          },
+          {
+            "Group": 8,
+            "Value": 0.0,
+            "Coef": 1.08
+          }
+        ],
+        "Total": [
+          {
+            "Group": 5,
+            "Value": 27.5,
+            "Coef": 1.69
+          },
+          {
+            "Group": 6,
+            "Value": 27.5,
+            "Coef": 2.17
+          },
+          {
+            "Group": 5,
+            "Value": 28.5,
+            "Coef": 2.94
+          },
+          {
+            "Group": 6,
+            "Value": 28.5,
+            "Coef": 1.37
+          }
+        ],
+        "Fora": [
+          {
+            "Group": 8,
+            "Value": -7.5,
+            "Coef": 3.12
+          },
+          {
+            "Group": 8,
+            "Value": -6.5,
+            "Coef": 2.17
+          },
+          {
+            "Group": 8,
+            "Value": -5.5,
+            "Coef": 1.392
+          },
+          {
+            "Group": 7,
+            "Value": 5.5,
+            "Coef": 2.845
+          },
+          {
+            "Group": 7,
+            "Value": 6.5,
+            "Coef": 1.69
+          },
+          {
+            "Group": 7,
+            "Value": 7.5,
+            "Coef": 1.336
+          }
+        ]
+      }
+    }
+  ],
+  "HasUpdate": false
+}

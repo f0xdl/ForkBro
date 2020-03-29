@@ -10,7 +10,7 @@ namespace ForkBro.Scanner.EventLinks
 
         public long Id{ get; }
         public Sport Sport{ get; }
-        public Command CommandA{ get; }
+        public Command CommandA { get; }
         public Command CommandB { get; }
     }
 }

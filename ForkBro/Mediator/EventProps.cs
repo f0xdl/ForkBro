@@ -5,7 +5,7 @@ using System;
 namespace ForkBro.Mediator
 {
     public struct EventProps
-    {
+    {//TODO заменить на обращение к EventBase
         public DateTime StartDT;
         public DateTime OverDT;
 

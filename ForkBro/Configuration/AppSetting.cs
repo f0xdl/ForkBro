@@ -12,9 +12,11 @@ namespace ForkBro.Configuration
     {
         public int LiveScanRepeat { get; set; }
         public int CountDaemon { get; set; }
-        public List<BookmakersProp> Companies { get; set; }
         public int CountPool { get; set; }
         public double MinQuality { get; set; }
+
+        public List<BookmakersProp> Companies { get; set; }
+        public Sport[] TrackedSports { get; set; }
 
         public Bookmaker[] GetEBookmakers()
         {
