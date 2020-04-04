@@ -9,8 +9,8 @@ namespace ForkBro.Scanner.EventLinks
     public class EventLink_1xbet : IEventLink
     {
         public Bookmaker Bookmaker { get; set; }
-        public bool Updated { get; set; }
-        public StatusEvent Status { get; set; }
+        public DateTime Updated { get; set; }
+        public string TournamentName => LE;
         public long Id => I;
         public Sport Sport
         {
@@ -71,10 +71,11 @@ namespace ForkBro.Scanner.EventLinks
         public string SE { get; set; } //Спорт
     }
 
-    public class GameList_1xBet
+    public class GameList_1xBet : IGameList
     {
         public bool Success { get; set; }
         [JsonProperty("Value")]
         public List<EventLink_1xbet> events { get; set; }
+        public IEventLink[] EventsArray => events.ToArray();
     }
 }

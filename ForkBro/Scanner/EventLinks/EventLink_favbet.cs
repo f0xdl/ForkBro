@@ -5,11 +5,12 @@ using Newtonsoft.Json;
 
 namespace ForkBro.Scanner.EventLinks
 {
-    public class EventLink_favbet: IEventLink
+    public class EventLink_favbet : IEventLink
     {
+        //Interface
         public Bookmaker Bookmaker { get; set; }
-        public bool Updated { get; set; }
-        public StatusEvent Status { get; set; }
+        public DateTime Updated { get; set; }
+        public string TournamentName => tournament_name;
         public long Id => event_id;
         public Sport Sport
         {
@@ -55,15 +56,18 @@ namespace ForkBro.Scanner.EventLinks
 
         public EventLink_favbet() => Bookmaker = Bookmaker._favbet;
 
+        //Real
         public int event_id { get; set; }
         public string event_name { get; set; }
         public string sport_name { get; set; }
+        public string tournament_name { get; set; }
     }
 
-    public class GameList_favbet
+    public class GameList_favbet : IGameList
     {
-        public bool Success => events!=null && events.Count > 0;
+        public bool Success => events != null && events.Count > 0;
         [JsonProperty("events")]
         public List<EventLink_favbet> events { get; set; }
+        public IEventLink[] EventsArray => events.ToArray();
     }
 }

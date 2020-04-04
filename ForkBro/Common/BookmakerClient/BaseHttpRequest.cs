@@ -34,9 +34,11 @@ namespace ForkBro.Common.BookmakerClient
             return request;
         }
 
-        public abstract List<IEventLink> GetListEvent();
-        public abstract ConcurrentDictionary<OldBetType, BettingOdds[]> GetDictionaryOdds(long eventId, Sport sport);
-               
+        public abstract ConcurrentDictionary<ushort, double[,]> GetDictionaryOdds(long eventId, Sport sport);
+
+        public abstract IGameList GetEventsList();
+        public abstract string GetBetOdds(long eventId);
+
         //Async Get/Post request
         public async Task<string> GetAsync(string Url, string Data)
         {

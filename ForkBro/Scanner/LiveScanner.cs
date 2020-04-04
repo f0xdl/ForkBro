@@ -7,8 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,8 +17,9 @@ namespace ForkBro.Scanner
     {
         readonly IScannerMediator hub;
         readonly Bookmaker[] bookmakers;
-        private readonly ILogger<LiveScanner> _logger;
-        int delay;
+        readonly Sport[] sports;
+        readonly ILogger<LiveScanner> _logger;
+        readonly int delay;
 
         Dictionary<Bookmaker, List<IEventLink>> events;
         BaseHttpRequest[] httpClients;
@@ -28,6 +28,7 @@ namespace ForkBro.Scanner
         public LiveScanner(ILogger<LiveScanner> logger, IScannerMediator mediator, ISetting setting)
         {
             delay = setting.LiveScanRepeat;
+            sports = setting.TrackedSports;
             bookmakers = setting.GetEBookmakers();
 
             hub = mediator;
@@ -57,39 +58,45 @@ namespace ForkBro.Scanner
                 }
                 finally
                 {
+                    hub.UpdateScannerStatus();
                     await Task.Delay(delay, stoppingToken);
                 }
             _logger.LogInformation("End scan bookmakers at: {time} (ElapsedMilliseconds:{int})", DateTimeOffset.Now, 0);
         }
 
-        //Methods
         void GetEventChanges(BaseHttpRequest httpRequest)
         {
+            DateTime utcNow = DateTime.UtcNow;
+            List<IEventLink> newEventLinks = new List<IEventLink>();
             try
             {
-                //Выполнить запрос онлайн событий на букмекере
-                List<IEventLink> newEventLinks = httpRequest.GetListEvent();
+                //Запрос списка онлайн событий на букмекере 
+                IGameList jsonData = httpRequest.GetEventsList();
 
-                //Клонирование текущего списка событий и установка флага обновления
-                events[httpRequest.BM].ForEach(x => x.Updated = false);
+                //Выборка подходящих событий
+                if (jsonData.Success)
+                    foreach (var item in jsonData.EventsArray)
+                        if (item.Sport != Sport.None && (sports == null || sports.Contains(item.Sport)))/*item.Status != StatusEvent.Over &&*/
+                            newEventLinks.Add(item);
 
                 //Удалить события, которых нет в текущей выборке
                 for (int i = 0; i < events[httpRequest.BM].Count; i++)
                 {
+                    //Поиск события в текущей выборке
                     for (int n = 0; n < newEventLinks.Count; n++)
-                        if (newEventLinks[n].Id == events[httpRequest.BM][i].Id)
+                        if (newEventLinks[n]?.Id == events[httpRequest.BM][i].Id)
                         {
-                            events[httpRequest.BM][i].Updated = true;
-                            newEventLinks[n].Updated = true;
+                            events[httpRequest.BM][i].Updated = utcNow;
+                            newEventLinks[n] = null;
                             break;
                         }
-
-                    if (!events[httpRequest.BM][i].Updated)
+                    //Если ивент не найден в новом списке и прошло 15 минут
+                    if (events[httpRequest.BM][i].Updated + new TimeSpan(0, 15, 0) < utcNow)
                         CloseEvent(events[httpRequest.BM][i]);
                 }
                 //Добавить событие если его нет в старом списке
                 for (int n = 0; n < newEventLinks.Count; n++)
-                    if (!newEventLinks[n].Updated)
+                    if (newEventLinks[n] != null)
                         AddEvent(newEventLinks[n]);
             }
             catch (Exception ex)
@@ -100,35 +107,29 @@ namespace ForkBro.Scanner
         //Event action
         void AddEvent(IEventLink ev)
         {
-            ev.Status = StatusEvent.New;
+            ev.Updated = DateTime.UtcNow;
+
+            //Поиск события в текущем списке events[Bookmaker]
             for (int i = 0; i < events[ev.Bookmaker].Count; i++)
                 if (events[ev.Bookmaker][i].Id == ev.Id)
                 {
-                    ev.Updated = true;
                     events[ev.Bookmaker][i] = ev;
-                    break;
+                    return;
                 }
 
-            if (!ev.Updated)
-            {
-                ev.Updated = true;
-                events[ev.Bookmaker].Add(ev);
-            }
-            //Добавление события на букмекера
+            //При отсутствии добавить в очередь событий букмекера
+            events[ev.Bookmaker].Add(ev);
             hub.EventEnqueue(ev);
         }
         void CloseEvent(IEventLink ev)
         {
-            //Удаление из массива
-            ev.Status = StatusEvent.Over;
+            //Удаление из списка событий
             for (int i = 0; i < events[ev.Bookmaker].Count; i++)
                 if (events[ev.Bookmaker][i].Id == ev.Id)
                 {
                     events[ev.Bookmaker].RemoveAt(i);
                     break;
                 }
-            //Удаление события
-            //hub.OverEvent(ev.Bookmaker, ev.Id);
         }
 
     }

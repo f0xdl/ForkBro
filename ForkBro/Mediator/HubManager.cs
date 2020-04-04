@@ -55,25 +55,22 @@ namespace ForkBro.Mediator
         public void AddSnapshot(int idPool, ref BetEvent bookmakerEvent) => pool[idPool].AddSnapshot(ref bookmakerEvent);
         public void RemoveSnapsot(int idPool, Bookmaker bookmaker) => pool[idPool].RemoveSnapshot(bookmaker);
         public void UpdateSnapshot(int idPool, ref BetEvent bookmakerEvent) => pool[idPool].UpdateSnapshot(ref bookmakerEvent);
-        public PoolRaw GetSnapshotsToComparison()
+        public PoolRaw GetSnapshots(bool updateDt)
         {
-            int idPool = -1;
             for (int i = 0; i < pool.Length; i++)
                 if (pool[i] != null && pool[i].HasUpdate)
-                { 
-                    idPool = i;
-                    break;
+                {
+                    //Обновление времени последнего сравнения
+                    if(updateDt)
+                        pool[i].UpdateDtComparison();
+                    return pool[i];
                 }
             
-            if (idPool == -1)
-                return null;
-
-            pool[idPool].UpdateDtComparison();
-            return pool[idPool];
+            return null;
         }
 
         /// <summary>
-        /// Return -1 if Hub Don
+        /// Return -1 if Hub Dont have command
         /// </summary>
         /// <param name="sport"></param>
         /// <param name="CommandA"></param>

@@ -7,155 +7,156 @@ using System;
 using System.Collections.Concurrent;
 using ForkBro.BookmakerModel.BaseEvents;
 using System.Linq;
+using System.Diagnostics;
 
 namespace ForkBro.Common.BookmakerClient
 {
     public class HttpRequest_1xbet : BaseHttpRequest
     {
-        public HttpRequest_1xbet() => BM = Bookmaker._1xbet; 
+        Stopwatch stopwatch = new Stopwatch();
 
-        public override List<IEventLink> GetListEvent()
+        public HttpRequest_1xbet() => BM = Bookmaker._1xbet;
+
+        public override ConcurrentDictionary<ushort, double[,]> GetDictionaryOdds(long eventId, Sport sport)
         {
-            List<IEventLink> events = new List<IEventLink>();
-            
-            var httpResult = GetAsync(@"https://xparibet.com/LiveFeed/Get1x2_VZip", "count=500&mode=8").Result;
-            var jsonData = Newtonsoft.Json.JsonConvert.DeserializeObject<GameList_1xBet>(httpResult);
-            
-            if (jsonData.Success)
-                foreach (var item in jsonData.events)
-                    if (item.Sport != Sport.None && item.Status != StatusEvent.Over)
-                        events.Add(item);
-            return events;
-        }
-
-
-        public override ConcurrentDictionary<OldBetType, BettingOdds[]> GetDictionaryOdds(long eventId, Sport sport)
-        {
-            Dictionary<OldBetType, List<BettingOdds>> tempList = new Dictionary<OldBetType, List<BettingOdds>>();
+            //stopwatch.Restart();
+            Dictionary<ushort, List<double[]>> oddsDict = new Dictionary<ushort, List<double[]>>();
 
             //Получение данных с конторы
             string httpResult = GetAsync(@"https://xparibet.com/LiveFeed/GetGameZip", $"id={eventId.ToString()}&lng=en&isSubGames=true&allEventsGroupSubGames=true&grMode=1").Result;
             var jsonResult = Newtonsoft.Json.JsonConvert.DeserializeObject<RequestEvent_1xbet>(httpResult);
-
-            //Создание пустых списков
-            foreach (OldBetType key in Enum.GetValues(typeof(OldBetType)))
-                tempList.Add(key, new List<BettingOdds>());
             //Заполнение odds
             if (jsonResult.Success)
-            { 
+            {
                 for (int i = 0; i < jsonResult.Value.E.Count; i++)
-                    switch (jsonResult.Value.E[i].T)
+                {
+                    int type = jsonResult.Value.E[i].T;
+                    double value = jsonResult.Value.E[i].P;
+                    double coef = jsonResult.Value.E[i].C;
+                    ushort id;
+                    bool isLeft;
+                    bool isFora = false;
+                    //Опрделение идентификатора
+                    switch (type)
                     {
-                        //Win (1,X,2)
                         case 1:
-                            tempList[OldBetType.Win].Add(new BettingOdds()
-                            {
-                                Group = BetGroup.Cmd_A,
-                                Value = jsonResult.Value.E[i].P,
-                                Coef = jsonResult.Value.E[i].C
-                            });
-                            break;
-                        case 2:
-                            tempList[OldBetType.Win].Add(new BettingOdds()
-                            {
-                                Group = BetGroup.Draw,
-                                Value = jsonResult.Value.E[i].P,
-                                Coef = jsonResult.Value.E[i].C
-                            });
-                            break;
                         case 3:
-                            tempList[OldBetType.Win].Add(new BettingOdds()
-                            {
-                                Group = BetGroup.Cmd_B,
-                                Value = jsonResult.Value.E[i].P,
-                                Coef = jsonResult.Value.E[i].C
-                            });
+                            id = (byte)BetType.Win + (((byte)EventUnit.MainTime) << 8);
                             break;
-
-                        //Fora
                         case 7:
-                            tempList[OldBetType.Fora].Add(new BettingOdds()
-                            {
-                                Group = BetGroup.Cmd_A,
-                                Value = jsonResult.Value.E[i].P,
-                                Coef = jsonResult.Value.E[i].C
-                            });
-                            break;
                         case 8:
-                            tempList[OldBetType.Fora].Add(new BettingOdds()
-                            {
-                                Group = BetGroup.Cmd_B,
-                                Value = jsonResult.Value.E[i].P,
-                                Coef = jsonResult.Value.E[i].C
-                            });
+                            id = (byte)BetType.Fora + (((byte)EventUnit.MainTime) << 8);
+                            isFora = true;
                             break;
-
-                        //Total
                         case 9:
-                            tempList[OldBetType.Total].Add(new BettingOdds()
-                            {
-                                Group = BetGroup.Over,
-                                Value = jsonResult.Value.E[i].P,
-                                Coef = jsonResult.Value.E[i].C
-                            });
-                            break;
                         case 10:
-                            tempList[OldBetType.Total].Add(new BettingOdds()
-                            {
-                                Group = BetGroup.Under,
-                                Value = jsonResult.Value.E[i].P,
-                                Coef = jsonResult.Value.E[i].C
-                            });
+                            id = (byte)BetType.Total + (((byte)EventUnit.MainTime) << 8);
                             break;
-
-                        //IndTotal1
                         case 11:
-                            tempList[OldBetType.IndTotal1].Add(new BettingOdds()
-                            {
-                                Group = BetGroup.Over,
-                                Value = jsonResult.Value.E[i].P,
-                                Coef = jsonResult.Value.E[i].C
-                            });
-                            break;
                         case 12:
-                            tempList[OldBetType.IndTotal1].Add(new BettingOdds()
-                            {
-                                Group = BetGroup.Under,
-                                Value = jsonResult.Value.E[i].P,
-                                Coef = jsonResult.Value.E[i].C
-                            });
+                            id = (byte)BetType.IndTotal_A + (((byte)EventUnit.MainTime) << 8);
                             break;
-
-                        //IndTotal12
                         case 13:
-                            tempList[OldBetType.IndTotal2].Add(new BettingOdds()
-                            {
-                                Group = BetGroup.Over,
-                                Value = jsonResult.Value.E[i].P,
-                                Coef = jsonResult.Value.E[i].C
-                            });
-                            break;
                         case 14:
-                            tempList[OldBetType.IndTotal2].Add(new BettingOdds()
-                            {
-                                Group = BetGroup.Under,
-                                Value = jsonResult.Value.E[i].P,
-                                Coef = jsonResult.Value.E[i].C
-                            });
+                            id = (byte)BetType.IndTotal_B + (((byte)EventUnit.MainTime) << 8);
                             break;
-
                         default: continue;
                     }
+
+                    //Опрделение идентификатора
+                    switch (type)
+                    {
+                        case 1:
+                        case 7:
+                        case 9:
+                        case 11:
+                        case 13:
+                            isLeft = true;
+                            break;
+                        case 3:
+                        case 8:
+                        case 10:
+                        case 12:
+                        case 14:
+                            isLeft = false;
+                            break;
+                        default: continue;
+                    }
+                    //Создание нового списка
+                    if (!oddsDict.ContainsKey(id))
+                        oddsDict.Add(id,new List<double[]>());
+                    
+                    bool found = false;
+                    for (int n = 0; n < oddsDict[id].Count; n++)
+                        if(!isFora)
+                            if (oddsDict[id][n][0] == value)
+                            {
+                                if (isLeft)
+                                    oddsDict[id][n][1] = coef;
+                                else
+                                    oddsDict[id][n][2] = coef;
+                                found = true;
+                                break;
+                            }
+                    else
+                        if (oddsDict[id][n][0] == (value*-1))
+                            {
+                                if (isLeft)
+                                    oddsDict[id][n][1] = coef;
+                                else
+                                    oddsDict[id][n][2] = coef;
+                                found = true;
+                                break;
+                            }
+
+
+                    //Добавление параметров
+                    if (!found)
+                        if (isLeft)
+                            oddsDict[id].Add(new double[3] { 
+                                value, 
+                                coef, 
+                                0 
+                            });
+                        else
+                            oddsDict[id].Add(new double[3] {
+                                value,
+                                0,
+                                coef
+                            });
+
+                }
+
             }
 
             //Transfer to Array
-            ConcurrentDictionary<OldBetType, BettingOdds[]> resultArray = new ConcurrentDictionary<OldBetType, BettingOdds[]>();
-            foreach (var item in tempList)
-                            if(item.Value.Count>0)
-                                resultArray.TryAdd(item.Key, item.Value.ToArray());
+            ConcurrentDictionary<ushort, double[,]> resultArray = new ConcurrentDictionary<ushort, double[,]>();
+            foreach (var oddsType in oddsDict)
+            {
+                double[,] odds = new double[oddsType.Value.Count, 3];
+                for (int i = 0; i < oddsType.Value.Count; i++)
+                {
+                    odds[i, 0] = oddsType.Value[i][0];
+                    odds[i, 1] = oddsType.Value[i][1];
+                    odds[i, 2] = oddsType.Value[i][2];
+                }
+                resultArray.TryAdd(oddsType.Key, odds);
+            }
 
+
+            //stopwatch.Stop();
+            //File.AppendAllText($"Logs\\stopwatch\\fav_{eventId}.log", $"---{stopwatch.ElapsedMilliseconds}({stopwatch.Elapsed})---" + "\r\n");
             return resultArray;
         }
+
+
+        public override IGameList GetEventsList()
+        {
+            string httpResult = GetAsync(@"https://1xbet.com/LiveFeed/Get1x2_VZip", "count=500&mode=8").Result;
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<GameList_1xBet>(httpResult);
+
+        }
+        public override string GetBetOdds(long eventId) => GetAsync(@"https://1xbet.com/LiveFeed/GetGameZip", $"id={eventId.ToString()}&lng=en&isSubGames=true&allEventsGroupSubGames=true&grMode=1").Result;
 
     }
 }

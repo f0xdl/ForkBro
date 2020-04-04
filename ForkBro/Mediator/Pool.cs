@@ -29,7 +29,7 @@ namespace ForkBro.Mediator
             snapshots[bookmakerEvent.Bookmaker] = bookmakerEvent;
         }
         public BetEvent GetSnapshot(Bookmaker bookmaker) => snapshots[bookmaker];
-        public BetEvent[] GetAllSnapshot { get => snapshots.Values.ToArray(); }
+        public BetEvent[] GetAllSnapshot() => snapshots.Values.ToArray(); 
         public bool HasUpdate
         {
             get

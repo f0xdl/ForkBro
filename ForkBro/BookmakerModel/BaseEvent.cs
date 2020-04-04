@@ -14,7 +14,7 @@ namespace ForkBro.BookmakerModel
         bool hasUpdate;
         DateTime dtUpdate;
         DateTime dtComparison;
-        ConcurrentDictionary<OldBetType, BettingOdds[]> bettingOdds;
+        ConcurrentDictionary<ushort, double[,]> bettingOdds; // Key = (ushort)((byte)BetType + (((byte)EventUnit) << 8))
 
         public long EventId { get; set; }
         public int PoolId { get; set; }
@@ -22,7 +22,7 @@ namespace ForkBro.BookmakerModel
 
         public BetEvent()
         {
-            bettingOdds = new ConcurrentDictionary<OldBetType, BettingOdds[]>();
+            bettingOdds = new ConcurrentDictionary<ushort, double[,]>();
         }
         //Признаки
         public Bookmaker Bookmaker { get; set; }
@@ -54,8 +54,8 @@ namespace ForkBro.BookmakerModel
         }
 
         //To Model
-        public void AddOrUpdate(OldBetType type, BettingOdds[] coefArray) => bettingOdds.AddOrUpdate(type, (k)=>coefArray, (k, v)=>coefArray);
-        public void UpdateOdds(ConcurrentDictionary<OldBetType, BettingOdds[]> newOdds)
+        public void AddOrUpdate(ushort type, double[,] coefArray) => bettingOdds.AddOrUpdate(type, (k)=>coefArray, (k, v)=>coefArray);
+        public void UpdateOdds(ConcurrentDictionary<ushort, double[,]> newOdds)
         {
             bettingOdds = newOdds;
             DtUpdate = DateTime.Now;
@@ -67,9 +67,9 @@ namespace ForkBro.BookmakerModel
         }
         //To Daemons
         public bool HasUpdate { get => hasUpdate; }
-        public BettingOdds[] GetBetTypeOdds(OldBetType type) => bettingOdds[type];
-        public Dictionary<OldBetType, BettingOdds[]> AllOdds => bettingOdds.ToDictionary(x => x.Key, x => x.Value);//Debug write to json file
-        public ConcurrentDictionary<OldBetType, BettingOdds[]> GetSnapshotOdds(OldBetType type) => bettingOdds;
+        public double[,] GetBetTypeOdds(ushort type) => bettingOdds[type];
+        public Dictionary<ushort, double[,]> AllOdds => bettingOdds.ToDictionary(x => x.Key, x => x.Value);//Debug write to json file
+        public ConcurrentDictionary<ushort, double[,]> GetSnapshotOdds() => bettingOdds;
        
     }
 }

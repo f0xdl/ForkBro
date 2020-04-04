@@ -34,6 +34,9 @@ namespace ForkBro.Configuration
         {
             hostContext.Configuration.Bind("AppSetting", this);
         }
+
+        //For Unit Test
+        public AppSettings() { }
     }
 }
 

@@ -6,6 +6,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -63,7 +65,7 @@ namespace ForkBro.BookmakerModel
                         bmEvent.EventId = link.Id;
                         bmEvent.Bookmaker = link.Bookmaker;
                         bmEvent.Sport = link.Sport;
-                        bmEvent.Status = link.Status;
+                        //bmEvent.Status = link.Status;
                         bmEvent.CommandA = link.CommandA;
                         bmEvent.CommandB = link.CommandB;
                         bmEvent.Status = StatusEvent.New;
@@ -76,30 +78,34 @@ namespace ForkBro.BookmakerModel
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {//FIX Проверить асинхронность данного блока
+            //Stopwatch stopwatch = new Stopwatch();
             if (HttpClient == null)
                 throw new Exception($"Model {bookmaker} don't have httpClient ");
             while (!stoppingToken.IsCancellationRequested)
-                try { 
-                CheckNewEvents();
-                CheckOverEvents();
+                try
+                {
+                    //stopwatch.Restart();
+                    CheckNewEvents();
+                    CheckOverEvents();
 
-                //Update odds in events
-                Parallel.ForEach(events, x =>
-                    x.UpdateOdds(
-                        HttpClient.GetDictionaryOdds(x.EventId, x.Sport)
-                ));
+                    //Update odds in events
+                    Parallel.ForEach(events, x =>
+                        x.UpdateOdds(
+                            HttpClient.GetDictionaryOdds(x.EventId, x.Sport)
+                    ));
 
-                await Task.Delay(delay, stoppingToken);
+                    //await Task.Delay(delay, stoppingToken);
+                    await Task.Delay(10, stoppingToken);
                 }
-                catch(Exception ex) {
+                catch (Exception ex) {
                     _logger.LogError(ex,"Ошибка во время выполнения модели букмеккера - {0}",bookmaker.ToString()); 
                 }
+                //finally
+                //{
+                //    stopwatch.Stop();
+                //    File.AppendAllText($"Logs\\stopwatch\\bm_{bookmaker}.log", $"---{stopwatch.Elapsed}---" + "\r\n");
+                //}
         }
-        //0080 0001 0001 0000 0000 --Win in Game
-        //0600 0001 0000 9985 0000 --Fora(-1,5)
-        //0150 0001 0051 0000 0000 -- Кто выиграет 4-ый гейм?
-        //0650 0001 0001 0095 0000 -- Тотал геймов
-        //0850 0001 0001 0000 0000 --Точный счёт
     }
 
     #region Заглушки для запуска служб

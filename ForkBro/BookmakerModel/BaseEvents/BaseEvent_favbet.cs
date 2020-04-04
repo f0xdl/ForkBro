@@ -106,8 +106,8 @@ namespace ForkBro.BookmakerModel.BaseEvents
         [JsonProperty("id")]
         public int Id { get; set; }
 
-        [JsonProperty("jsonrpc")]
-        public string Jsonrpc { get; set; }
+        //[JsonProperty("jsonrpc")]
+        //public string Jsonrpc { get; set; }
 
         [JsonProperty("result")]
         public IList<BaseEvent_favbet> Result { get; set; }
