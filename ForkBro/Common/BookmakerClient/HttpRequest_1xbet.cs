@@ -13,10 +13,7 @@ namespace ForkBro.Common.BookmakerClient
 {
     public class HttpRequest_1xbet : BaseHttpRequest
     {
-        Stopwatch stopwatch = new Stopwatch();
-
         public HttpRequest_1xbet() => BM = Bookmaker._1xbet;
-
         public override ConcurrentDictionary<ushort, double[,]> GetDictionaryOdds(long eventId, Sport sport)
         {
             //stopwatch.Restart();
@@ -99,7 +96,7 @@ namespace ForkBro.Common.BookmakerClient
                                 break;
                             }
                     else
-                        if (oddsDict[id][n][0] == (value*-1))
+                        if (oddsDict[id][n][0] == (-1*value))
                             {
                                 if (isLeft)
                                     oddsDict[id][n][1] = coef;
@@ -148,15 +145,14 @@ namespace ForkBro.Common.BookmakerClient
             //File.AppendAllText($"Logs\\stopwatch\\fav_{eventId}.log", $"---{stopwatch.ElapsedMilliseconds}({stopwatch.Elapsed})---" + "\r\n");
             return resultArray;
         }
-
-
         public override IGameList GetEventsList()
         {
             string httpResult = GetAsync(@"https://1xbet.com/LiveFeed/Get1x2_VZip", "count=500&mode=8").Result;
             return Newtonsoft.Json.JsonConvert.DeserializeObject<GameList_1xBet>(httpResult);
 
         }
-        public override string GetBetOdds(long eventId) => GetAsync(@"https://1xbet.com/LiveFeed/GetGameZip", $"id={eventId.ToString()}&lng=en&isSubGames=true&allEventsGroupSubGames=true&grMode=1").Result;
+        public override string GetBetOdds(long eventId) 
+            => GetAsync(@"https://1xbet.com/LiveFeed/GetGameZip", $"id={eventId.ToString()}&lng=en&isSubGames=true&allEventsGroupSubGames=true&grMode=1").Result;
 
     }
 }

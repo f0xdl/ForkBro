@@ -15,34 +15,32 @@ namespace ForkBro.Scanner
 {
     public class LiveScanner : BackgroundService
     {
-        readonly IScannerMediator hub;
-        readonly Bookmaker[] bookmakers;
-        readonly Sport[] sports;
-        readonly ILogger<LiveScanner> _logger;
-        readonly int delay;
-
-        Dictionary<Bookmaker, List<IEventLink>> events;
-        BaseHttpRequest[] httpClients;
+        private readonly IScannerMediator _hub;
+        private readonly Sport[] _sports;
+        private readonly ILogger<LiveScanner> _logger;
+        private readonly int _delay;
+        private readonly Dictionary<Bookmaker, List<IEventLink>> _events;
+        private readonly BaseHttpRequest[] _httpClients;
 
 
         public LiveScanner(ILogger<LiveScanner> logger, IScannerMediator mediator, ISetting setting)
         {
-            delay = setting.LiveScanRepeat;
-            sports = setting.TrackedSports;
-            bookmakers = setting.GetEBookmakers();
+            _delay = setting.LiveScanRepeat;
+            _sports = setting.TrackedSports;
+            var bookmakers = setting.GetEBookmakers();
 
-            hub = mediator;
+            _hub = mediator;
             _logger = logger;
 
-            //Добавление букмекеров
-            events = new Dictionary<Bookmaker, List<IEventLink>>();
+            //Add events list
+            _events = new Dictionary<Bookmaker, List<IEventLink>>();
             foreach (Bookmaker bm in bookmakers)
-                events.Add(bm, new List<IEventLink>());
+                _events.Add(bm, new List<IEventLink>());
 
-            //Добавление парсеров
-            httpClients = new BaseHttpRequest[bookmakers.Length];
+            //Add clients
+            _httpClients = new BaseHttpRequest[bookmakers.Length];
             for (int i = 0; i < bookmakers.Length; i++)
-                httpClients[i] = BaseHttpRequest.GetHttpRequest(bookmakers[i]);
+                _httpClients[i] = BaseHttpRequest.GetHttpRequest(bookmakers[i]);
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -50,7 +48,7 @@ namespace ForkBro.Scanner
             while (!stoppingToken.IsCancellationRequested)
                 try
                 {
-                    await Task.Run(() => Parallel.ForEach(httpClients, x => GetEventChanges(x)));
+                    await Task.Run(() => Parallel.ForEach(_httpClients, x => GetEventChanges(x)));
                 }
                 catch (Exception ex)
                 {
@@ -58,13 +56,13 @@ namespace ForkBro.Scanner
                 }
                 finally
                 {
-                    hub.UpdateScannerStatus();
-                    await Task.Delay(delay, stoppingToken);
+                    _hub.UpdateScannerStatus();
+                    await Task.Delay(_delay, stoppingToken);
                 }
             _logger.LogInformation("End scan bookmakers at: {time} (ElapsedMilliseconds:{int})", DateTimeOffset.Now, 0);
         }
 
-        void GetEventChanges(BaseHttpRequest httpRequest)
+        private void GetEventChanges(BaseHttpRequest httpRequest)
         {
             DateTime utcNow = DateTime.UtcNow;
             List<IEventLink> newEventLinks = new List<IEventLink>();
@@ -75,59 +73,61 @@ namespace ForkBro.Scanner
 
                 //Выборка подходящих событий
                 if (jsonData.Success)
-                    foreach (var item in jsonData.EventsArray)
-                        if (item.Sport != Sport.None && (sports == null || sports.Contains(item.Sport)))/*item.Status != StatusEvent.Over &&*/
+                    foreach (IEventLink item in jsonData.EventsArray)
+                        if (item.Sport != Sport.None && (_sports == null || _sports.Contains(item.Sport)))/*item.Status != StatusEvent.Over &&*/
                             newEventLinks.Add(item);
 
                 //Удалить события, которых нет в текущей выборке
-                for (int i = 0; i < events[httpRequest.BM].Count; i++)
+                for (int i = 0; i < _events[httpRequest.BM].Count; i++)
                 {
                     //Поиск события в текущей выборке
                     for (int n = 0; n < newEventLinks.Count; n++)
-                        if (newEventLinks[n]?.Id == events[httpRequest.BM][i].Id)
+                        if (newEventLinks[n]?.Id == _events[httpRequest.BM][i].Id)
                         {
-                            events[httpRequest.BM][i].Updated = utcNow;
+                            _events[httpRequest.BM][i].Updated = utcNow;
                             newEventLinks[n] = null;
                             break;
                         }
                     //Если ивент не найден в новом списке и прошло 15 минут
-                    if (events[httpRequest.BM][i].Updated + new TimeSpan(0, 15, 0) < utcNow)
-                        CloseEvent(events[httpRequest.BM][i]);
+                    if (_events[httpRequest.BM][i].Updated + new TimeSpan(0, 15, 0) < utcNow)
+                        CloseEvent(_events[httpRequest.BM][i]);
                 }
                 //Добавить событие если его нет в старом списке
-                for (int n = 0; n < newEventLinks.Count; n++)
-                    if (newEventLinks[n] != null)
-                        AddEvent(newEventLinks[n]);
+                foreach (IEventLink evLinking in newEventLinks)
+                    if (evLinking != null)
+                        AddEvent(evLinking);
             }
             catch (Exception ex)
             {
                 _logger.LogInformation(ex.ToString());
             }
         }
+
         //Event action
-        void AddEvent(IEventLink ev)
+        private void AddEvent(IEventLink ev)
         {
             ev.Updated = DateTime.UtcNow;
 
             //Поиск события в текущем списке events[Bookmaker]
-            for (int i = 0; i < events[ev.Bookmaker].Count; i++)
-                if (events[ev.Bookmaker][i].Id == ev.Id)
+            for (int i = 0; i < _events[ev.Bookmaker].Count; i++)
+                if (_events[ev.Bookmaker][i].Id == ev.Id)
                 {
-                    events[ev.Bookmaker][i] = ev;
+                    _events[ev.Bookmaker][i] = ev;
                     return;
                 }
 
             //При отсутствии добавить в очередь событий букмекера
-            events[ev.Bookmaker].Add(ev);
-            hub.EventEnqueue(ev);
+            _events[ev.Bookmaker].Add(ev);
+            _hub.EventEnqueue(ev);
         }
-        void CloseEvent(IEventLink ev)
+
+        private void CloseEvent(IEventLink ev)
         {
             //Удаление из списка событий
-            for (int i = 0; i < events[ev.Bookmaker].Count; i++)
-                if (events[ev.Bookmaker][i].Id == ev.Id)
+            for (int i = 0; i < _events[ev.Bookmaker].Count; i++)
+                if (_events[ev.Bookmaker][i].Id == ev.Id)
                 {
-                    events[ev.Bookmaker].RemoveAt(i);
+                    _events[ev.Bookmaker].RemoveAt(i);
                     break;
                 }
         }

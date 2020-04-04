@@ -22,7 +22,7 @@ namespace ForkBro.Common.BookmakerClient
             switch (bookmaker)
             {
                 case Bookmaker._1xbet:
-                    request = new HttpRequest_1xbet();
+                    request = HttpRequest_1xbet.CreateInstance();
                     break;
                 case Bookmaker._favbet:
                     request = new HttpRequest_favbet();

@@ -28,7 +28,7 @@ namespace ForkBro.Tests
         {
             Common.Sport sport = Common.Sport.Basketball;
             long id = 230813162;
-            HttpRequest_1xbet httpRequest = new HttpRequest_1xbet();
+            HttpRequest_1xbet httpRequest = HttpRequest_1xbet.CreateInstance();
             var result = httpRequest.GetDictionaryOdds(id, sport);
             var str = Newtonsoft.Json.JsonConvert.SerializeObject(result, Newtonsoft.Json.Formatting.Indented);
 
