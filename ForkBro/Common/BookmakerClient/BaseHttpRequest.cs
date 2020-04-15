@@ -16,23 +16,13 @@ namespace ForkBro.Common.BookmakerClient
     {
         public Bookmaker BM { get; protected internal set; }
 
-        public static BaseHttpRequest GetHttpRequest(Bookmaker bookmaker)
-        {
-            BaseHttpRequest request;
-            switch (bookmaker)
+        public static BaseHttpRequest GetInstance(Bookmaker bookmaker)
+            => bookmaker switch
             {
-                case Bookmaker._1xbet:
-                    request = HttpRequest_1xbet.CreateInstance();
-                    break;
-                case Bookmaker._favbet:
-                    request = new HttpRequest_favbet();
-                    break;
-                default:
-                    throw new Exception("Клиента для букмекера " + bookmaker.ToString() + " не существует");
-            }
-            request.BM = bookmaker;
-            return request;
-        }
+                Bookmaker._1xbet => new HttpRequest_1xbet(),
+                Bookmaker._favbet => new HttpRequest_favbet(),
+                _ => throw new Exception("Клиента для букмекера " + bookmaker.ToString() + " не существует")
+            };
 
         public abstract ConcurrentDictionary<ushort, double[,]> GetDictionaryOdds(long eventId, Sport sport);
 

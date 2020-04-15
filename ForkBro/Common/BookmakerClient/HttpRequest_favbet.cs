@@ -138,7 +138,7 @@ namespace ForkBro.Common.BookmakerClient
             }
 
             //stopwatch.Stop();
-            //File.AppendAllText($"Logs\\stopwatch\\fav_{eventId}.log", $"---{stopwatch.ElapsedMilliseconds}({stopwatch.Elapsed})---" + "\r\n");
+            //File.AppendAllText($"Log\\stopwatch\\fav_{eventId}.log", $"---{stopwatch.ElapsedMilliseconds}({stopwatch.Elapsed})---" + "\r\n");
             return resultArray;
         }
 

@@ -23,6 +23,7 @@ namespace ForkBro.BookmakerModel
         public BetEvent()
         {
             bettingOdds = new ConcurrentDictionary<ushort, double[,]>();
+            Sport = Sport.None;
         }
         //Признаки
         public Bookmaker Bookmaker { get; set; }

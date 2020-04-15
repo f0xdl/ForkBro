@@ -31,10 +31,10 @@ namespace ForkBro.Mediator
             return i + 1;
         }
 
-        public int AddPoolRaw(EventProps props)
+        public int AddPoolRaw()
         {
             int id = GetNextIndex();
-            this.pool[id] = new PoolRaw(props);
+            this.pool[id] = new PoolRaw();
             return id;
         }
         public void RemovePoolRaw(long index) => pool[index] = null;
@@ -53,19 +53,19 @@ namespace ForkBro.Mediator
             return null;
         }
         public void AddSnapshot(int idPool, ref BetEvent bookmakerEvent) => pool[idPool].AddSnapshot(ref bookmakerEvent);
-        public void RemoveSnapsot(int idPool, Bookmaker bookmaker) => pool[idPool].RemoveSnapshot(bookmaker);
+        public void RemoveSnapshot(int idPool, Bookmaker bookmaker) => pool[idPool].RemoveSnapshot(bookmaker);
         public void UpdateSnapshot(int idPool, ref BetEvent bookmakerEvent) => pool[idPool].UpdateSnapshot(ref bookmakerEvent);
         public PoolRaw GetSnapshots(bool updateDt)
         {
             for (int i = 0; i < pool.Length; i++)
-                if (pool[i] != null && pool[i].HasUpdate)
-                {
-                    //Обновление времени последнего сравнения
-                    if(updateDt)
-                        pool[i].UpdateDtComparison();
-                    return pool[i];
-                }
-            
+                    if (pool[i] != null && pool[i].HasUpdate)
+                        lock (pool[i])
+                        {
+                            //Обновление времени последнего сравнения
+                            if (updateDt)
+                                pool[i].UpdateDtComparison();
+                            return pool[i];
+                        }
             return null;
         }
 
@@ -76,7 +76,7 @@ namespace ForkBro.Mediator
         /// <param name="CommandA"></param>
         /// <param name="CommandB"></param>
         /// <returns></returns>
-        public double CalculateFuzzyEvent(Sport sport, Command CommandA, Command CommandB, out int idPool, out bool reverse)
+        public bool CalculateFuzzyEvent(Sport sport, Command CommandA, Command CommandB, out int idPool, out bool reverse)
         {
             FuzzyComparer fuzzyComparer = new FuzzyComparer();
             string[] newEvent = new string[] { CommandA.NameEng, CommandB.NameEng };
@@ -85,9 +85,11 @@ namespace ForkBro.Mediator
             double quality = 0;
             double maxQuality = 0;
             for (int i = 0; i < pool.Length; i++)
-                if (pool[i]?.props.sport == sport)
+                if (pool[i]?.GetSport() == sport)
                 {
-                    string[] inPool = new string[] { pool[i].props.CommandA.NameEng, pool[i].props.CommandB.NameEng };
+                    pool[i].GetCommands(out CommandA,out CommandB);
+                    string[] inPool = { CommandA.NameEng, CommandB.NameEng };
+                    
                     quality += fuzzyComparer.CalculateFuzzyEqualValue(inPool[0], newEvent[0]);
                     quality += fuzzyComparer.CalculateFuzzyEqualValue(inPool[1], newEvent[1]);
                     quality /= 2;
@@ -97,7 +99,7 @@ namespace ForkBro.Mediator
                     {
                         idPool = i;
                         reverse = false;
-                        break;
+                        return true;
                     }
                     quality = 0;
 
@@ -110,11 +112,11 @@ namespace ForkBro.Mediator
                     {
                         idPool = i;
                         reverse = false;
-                        break;
+                        return true;
                     }
                     quality = 0;
                 }
-            return quality;
+            return false;
         }
     }
 }

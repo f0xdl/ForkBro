@@ -8,21 +8,23 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace ForkBro.Mediator
 {
     public class HubMediator : IScannerMediator, IBookmakerMediator, IDaemonMasterMediator, IApiMediator
     {
+        static readonly object AddLocker = new object();
+        static readonly object ForkFileLocker = new object();
+        
         readonly Dictionary<Bookmaker, int> _bookmakersDelay;
         readonly ILogger<HubMediator> _logger;
         readonly Dictionary<Bookmaker, DateTime> _statusServices;
         readonly HubManager _hubManager;
-        ConcurrentQueue<IEventLink> Links { get; set; }
+        ConcurrentQueue<IEventLink> Links { get;}
+
         public int ScannerDelay { get; set; }
         public int CountDaemons { get; set; }
-        static readonly object AddLocker = new object();
-
-        private Sport[] _trackedSportTypes;
 
         public HubMediator(ILogger<HubMediator> logger, ISetting setting)
         {
@@ -46,9 +48,6 @@ namespace ForkBro.Mediator
             _statusServices.Add(Bookmaker.LiveScanner, DateTime.Now);
             _statusServices.Add(Bookmaker.DaemonMaster, DateTime.Now);
             _statusServices.Add(Bookmaker.Client, DateTime.Now);
-
-            //Tracked Sport Types
-            _trackedSportTypes = setting.TrackedSports;
         }
 
         public Bookmaker[] GetBookmakers() => _bookmakersDelay.Keys.ToArray();
@@ -58,87 +57,93 @@ namespace ForkBro.Mediator
         public void EventEnqueue(IEventLink link)
         {
             Links.Enqueue(link);
-            _logger.LogTrace($"Enqueue: {link.Bookmaker}, {link.TournamentName}, {link.CommandA.NameEng}, {link.CommandB.NameEng}, {link.Sport}, {link.Id}");
+            _logger.LogTrace($"Enqueue: {link.Bookmaker}, {link.Id}");
         }
-
         public void UpdateScannerStatus() => _statusServices[Bookmaker.LiveScanner] = DateTime.Now;
         #endregion
 
-        #region IbookmakerMediator
+        #region IBookmakerMediator
+
         public bool TryGetNewEvent(Bookmaker bookmaker, out IEventLink link)
         {
             if (Links.TryPeek(out link))
                 if (link.Bookmaker == bookmaker)
                 {
-                    Links.TryDequeue(out link);
-                    return true;
+                    Links.TryDequeue(out IEventLink linkD);
+                    if (link == linkD)
+                        return true;
+                    else
+                        Links.Enqueue(linkD);       
                 }
+
             //Если новое событие не относится к букмекеру
             return false;
         }
         public void AddEvent(IEventLink link, ref BetEvent bookmakerEvent)
         {
-            int idPool = 0;
             lock (AddLocker)
                 try
                 {
-                    double quality = _hubManager.CalculateFuzzyEvent(link.Sport, link.CommandA, link.CommandB, out int outIdPool, out bool reverse);//Поиск соответствия в pool
-                    idPool = outIdPool;
-                    //Добавление нового элемента Пула при отсутствии
-                    if (quality == 0)
-                        idPool = _hubManager.AddPoolRaw(new EventProps()
-                        {
-                            sport = bookmakerEvent.Sport,
-                            StartDT = DateTime.Now,
-                            status = bookmakerEvent.Status,
-                            CommandA = bookmakerEvent.CommandA,
-                            CommandB = bookmakerEvent.CommandB,
-                        });
-
+                    
+                    bool eventContains = _hubManager.CalculateFuzzyEvent(link.Sport, link.CommandA, link.CommandB, out int idPool, out bool reverse);//Поиск соответствия в pool
+                    if (!eventContains)
+                        idPool = _hubManager.AddPoolRaw();
                     bookmakerEvent.PoolId = idPool;
                     bookmakerEvent.Reverse = reverse;
                     //Добавление снимка в Пул
                     _hubManager.AddSnapshot(idPool, ref bookmakerEvent);
-                    _logger.LogInformation($"[quality={quality}] Bookmaker {link.Bookmaker}, event ADD {link.Id} [{link.CommandA.NameEng}|{link.CommandB.NameEng}|Pool {idPool}]");
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Error add event in pool [{link.Bookmaker}|Event {link.Id}|{link.CommandA.NameEng}|{link.CommandB.NameEng}|Pool {idPool}]");
+                    _logger.LogError(ex, $"Error add event in pool [{link.Bookmaker}|Event {link.Id}|{link.CommandA.NameEng}|{link.CommandB.NameEng}]");
                 }
+            _logger.LogInformation($"Snapshot ADD {link.Id} [{link.CommandA.NameEng}|{link.CommandB.NameEng}]");
         }
-        public void OverEvent(int idPool, Bookmaker bm)
+        public void OverEvent(int idPool, Bookmaker bm = Bookmaker.None)
         {
             if (bm == Bookmaker.None)
                 _hubManager.RemovePoolRaw(idPool);
             else
-                _hubManager.RemoveSnapsot(idPool, bm);
-            _logger.LogInformation($"Bookmaker {bm}, event OVER {idPool}");
+                _hubManager.RemoveSnapshot(idPool, bm);
+            _logger.LogInformation($"Snapshot OVER {idPool} on {bm}");
         }
-
-        //public void UpdateSnapshot(int idPool, ref EventBase betEvent) => hubManager.UpdateSnapshot(idPool, ref betEvent);
-        public bool HaveNewEvent() => !Links.IsEmpty;
-
+        public bool HaveNewLink() => !Links.IsEmpty;
         public void UpdateBookmakerStatus(Bookmaker bm) => _statusServices[bm] = DateTime.Now;
-        public int GetBookmakerDelay(Bookmaker bookmaker) => _bookmakersDelay[bookmaker];
-
-        public int EventPoolId(Bookmaker bookmaker, long idEvent) => _hubManager.HasEventInPool(bookmaker, idEvent);
-        public BetEvent GetEvent(Bookmaker bookmaker, long idEvent) => _hubManager.GetEvent(bookmaker, idEvent);
+        public int GetEventPoolId(Bookmaker bookmaker, long idEvent) => _hubManager.HasEventInPool(bookmaker, idEvent);
         #endregion
 
         #region IDaemonMasterMediator
         public void UpdateDaemonMasterStatus() => _statusServices[Bookmaker.DaemonMaster] = DateTime.Now;
         public PoolRaw GetNextPool() => _hubManager.GetSnapshots(true);
 
+
+        
         public void AddFork(List<Fork> forks)
         {
+            if (forks.Count == 0)
+                return;
+
+            string folder = "Log\\Fork";
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
+
+
             foreach (var fork in forks)
-            {
-                string str = Newtonsoft.Json.JsonConvert.SerializeObject(fork, Newtonsoft.Json.Formatting.Indented);
-                string name = $"Logs\\Forks\\{fork.IdEventA}{fork.BookmakerA}-{fork.IdEventB}{fork.BookmakerB}.log";
-                //if (!File.Exists(name))
-                //    File.Create(name);
-                File.WriteAllText(name, str);
-            }
+                _logger.LogInformation($"New fork {fork.Sport.ToString()} {fork.IdEventA}({fork.BookmakerA})\t{fork.IdEventB}({fork.BookmakerB})");
+            lock (ForkFileLocker)
+                try
+                {
+                    string fileName = $"{folder}\\{forks[0].Sport}_{forks[0].IdEventA}_{forks[0].IdEventB}.log";
+                    string fileText = Newtonsoft.Json.JsonConvert.SerializeObject(forks, Newtonsoft.Json.Formatting.Indented);
+                    using (StreamWriter writer = new StreamWriter(fileName))
+                    {
+                        writer.Write(fileText);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Ошибка при записи вилки в файл");
+                }
         }
 
         #endregion
@@ -161,14 +166,13 @@ namespace ForkBro.Mediator
     }
     public interface IBookmakerMediator
     {
+        bool HaveNewLink();
         bool TryGetNewEvent(Bookmaker bookmaker, out IEventLink link);
         void AddEvent(IEventLink link, ref BetEvent bookmakerEvent);
         void OverEvent(int idPool, Bookmaker bm);
-        bool HaveNewEvent();
-        BetEvent GetEvent(Bookmaker bookmaker, long idEvent);
+        int GetEventPoolId(Bookmaker bookmaker, long id);
+        
         void UpdateBookmakerStatus(Bookmaker bm);
-        int GetBookmakerDelay(Bookmaker bookmaker);
-        int EventPoolId(Bookmaker bookmaker, long id);
     }
     public interface IDaemonMasterMediator
     {
@@ -178,7 +182,7 @@ namespace ForkBro.Mediator
         PoolRaw GetNextPool();
         void UpdateDaemonMasterStatus();
     }
-    public interface IApiMediator //TODO Connect API
+    public interface IApiMediator
     {
         Dictionary<Bookmaker, int> CountEvents();
         Dictionary<Bookmaker, DateTime> GetLastUpdate();

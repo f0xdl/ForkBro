@@ -61,10 +61,6 @@ namespace ForkBro
         #region DaemonMaster [ILogger,ICalcDaemonMediator]
         services.AddHostedService<DaemonMaster>();
         #endregion
-
-        #region Worker [ILogger,HubMediator]
-        //services.AddHostedService<Worker>(); //TODO Worker
-        #endregion
                 });
     }
 }

@@ -7,16 +7,12 @@
 
   <ItemGroup>
     <Compile Remove="Event\**" />
-    <Compile Remove="Logs\**" />
     <Compile Remove="Log\**" />
     <Content Remove="Event\**" />
-    <Content Remove="Logs\**" />
     <Content Remove="Log\**" />
     <EmbeddedResource Remove="Event\**" />
-    <EmbeddedResource Remove="Logs\**" />
     <EmbeddedResource Remove="Log\**" />
     <None Remove="Event\**" />
-    <None Remove="Logs\**" />
     <None Remove="Log\**" />
   </ItemGroup>
 

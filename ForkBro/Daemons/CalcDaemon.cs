@@ -186,25 +186,28 @@ namespace ForkBro.Daemons
                         BetEvent[] betEvents = pool.GetAllSnapshot();
                         //Перебор всех комбинаций UnitKey
                         foreach (BetType type in Enum.GetValues(typeof(BetType)))
-                            foreach (EventUnit unit in Enum.GetValues(typeof(EventUnit)))
-                            {
-                                //Создание и заполнение  odds
-                                var oddsList = new Dictionary<Bookmaker,CalcOdds>();
-                                for (int i = 0; i < betEvents.Length; i++)
-                                    if (betEvents[i].AllOdds.TryGetValue((ushort)((byte)type + (((byte)unit) << 8)), out double[,] resultOdds))
+                        foreach (EventUnit unit in Enum.GetValues(typeof(EventUnit)))
+                        {
+                            //Создание и заполнение  odds
+                            var oddsList = new Dictionary<Bookmaker, CalcOdds>();
+                            foreach (BetEvent betEvent in betEvents)
+                                if (betEvent.AllOdds.TryGetValue((ushort) ((byte) type + (((byte) unit) << 8)),
+                                    out double[,] resultOdds))
+                                {
+                                    var odds = new CalcOdds
                                     {
-                                        var odds = new CalcOdds();
-                                        odds.Reverse = betEvents[i].Reverse;
-                                        odds.IdEvent = betEvents[i].EventId;
-                                        odds.Values = resultOdds;
-                                        odds.Bookmaker = betEvents[i].Bookmaker;
-                                        oddsList.Add(betEvents[i].Bookmaker, odds);
-                                    }
+                                        Reverse = betEvent.Reverse,
+                                        IdEvent = betEvent.EventId,
+                                        Values = resultOdds,
+                                        Bookmaker = betEvent.Bookmaker
+                                    };
+                                    oddsList.Add(betEvent.Bookmaker, odds);
+                                }
 
-                                //Запуск расчёта odds
-                                if(oddsList.Count>1)
-                                    await Task.Run(() => CalcFunc(betEvents[0].Sport,unit, type, oddsList));
-                            }
+                            //Запуск расчёта odds
+                            if (oddsList.Count > 1)
+                                await Task.Run(() => CalcFunc(betEvents[0].Sport, unit, type, oddsList));
+                        }
                     }
                     else //Пауза при отсутствии обновлений
                         Thread.Sleep(delay);

@@ -53,6 +53,7 @@ namespace ForkBro.Daemons
                 }
                 finally
                 {
+                    hub.UpdateDaemonMasterStatus();
                     await Task.Delay(5000, stoppingToken);
                 }
             }

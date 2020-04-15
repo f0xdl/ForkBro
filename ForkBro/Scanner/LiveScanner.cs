@@ -40,7 +40,7 @@ namespace ForkBro.Scanner
             //Add clients
             _httpClients = new BaseHttpRequest[bookmakers.Length];
             for (int i = 0; i < bookmakers.Length; i++)
-                _httpClients[i] = BaseHttpRequest.GetHttpRequest(bookmakers[i]);
+                _httpClients[i] = BaseHttpRequest.GetInstance(bookmakers[i]);
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -48,7 +48,7 @@ namespace ForkBro.Scanner
             while (!stoppingToken.IsCancellationRequested)
                 try
                 {
-                    await Task.Run(() => Parallel.ForEach(_httpClients, x => GetEventChanges(x)));
+                    await Task.Run(() => Parallel.ForEach(_httpClients, GetEventChanges), stoppingToken);
                 }
                 catch (Exception ex)
                 {
@@ -118,6 +118,12 @@ namespace ForkBro.Scanner
 
             //При отсутствии добавить в очередь событий букмекера
             _events[ev.Bookmaker].Add(ev);
+            _logger.LogDebug($"{ev.Bookmaker.ToString()}\t|" +
+                             $"\t{ev.Sport.ToString()}\t|" +
+                             $"\t{ev.TournamentName}\t|" +
+                             $"\t{ev.Id}\t|\t" +
+                             $"{ev.CommandA.NameEng}\t|" +
+                             $"\t{ev.CommandB.NameEng}");
             _hub.EventEnqueue(ev);
         }
 

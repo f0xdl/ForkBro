@@ -95,8 +95,7 @@ namespace ForkBro.Common.BookmakerClient
                                 found = true;
                                 break;
                             }
-                    else
-                        if (oddsDict[id][n][0] == (-1*value))
+                            else if (oddsDict[id][n][0] == (-1*value))
                             {
                                 if (isLeft)
                                     oddsDict[id][n][1] = coef;
@@ -139,10 +138,6 @@ namespace ForkBro.Common.BookmakerClient
                 }
                 resultArray.TryAdd(oddsType.Key, odds);
             }
-
-
-            //stopwatch.Stop();
-            //File.AppendAllText($"Logs\\stopwatch\\fav_{eventId}.log", $"---{stopwatch.ElapsedMilliseconds}({stopwatch.Elapsed})---" + "\r\n");
             return resultArray;
         }
         public override IGameList GetEventsList()

@@ -12,114 +12,118 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ForkBro.Configuration;
 
 namespace ForkBro.BookmakerModel
 {
     public abstract class BookmakerService : BackgroundService
     {
-        List<BetEvent> events;
-        int delay;
-        IBookmakerMediator hub;
+        readonly List<BetEvent> events;
+        readonly int _delay;
+        readonly IBookmakerMediator _hub;
 
-        protected readonly Bookmaker bookmaker;
-        protected internal readonly ILogger<BookmakerService> _logger;
-        protected internal BaseHttpRequest HttpClient;
+        protected readonly Bookmaker Bookmaker;
+        readonly ILogger<BookmakerService> _logger;
+        readonly BaseHttpRequest _httpClient;
 
-        public BookmakerService(ILogger<BookmakerService> logger, IBookmakerMediator mediator, Bookmaker BM)
+        protected BookmakerService(ILogger<BookmakerService> logger,ISetting setting, IBookmakerMediator mediator, Bookmaker BM)
         {
             _logger = logger;
-            hub = mediator;
-            bookmaker = BM;
-            delay = mediator.GetBookmakerDelay(BM);
-            HttpClient = BaseHttpRequest.GetHttpRequest(bookmaker);
+            _hub = mediator;
+            Bookmaker = BM;
+            _delay = setting.Companies.First(x => x.id == BM).repeat;
+            _httpClient = BaseHttpRequest.GetInstance(Bookmaker);
             events = new List<BetEvent>();
         }
-        void EventIsOver(long[] eventsId)
+    
+        void CheckEvents()
         {
-            if (eventsId != null)
-                foreach (var item in events)
-                    if (eventsId.Contains(item.EventId))
-                    {
-                        hub.OverEvent(item.PoolId, bookmaker);
-                        events.Remove(item);
-                    }
-        }
-        void CheckOverEvents() => EventIsOver(events.Where(x => x.Status == StatusEvent.Over)?.Select(x=>x.EventId).ToArray());
-        void CheckNewEvents()
-        {
-            if (hub.HaveNewEvent())
+            //Check NEW link
+            if (_hub.HaveNewLink())
                 for (int n = 0; n < 10; n++)
-                    if (hub.TryGetNewEvent(bookmaker, out IEventLink link))
+                    if (_hub.TryGetNewEvent(Bookmaker, out IEventLink link))
                     {
-                        int poolId = hub.EventPoolId(link.Bookmaker, link.Id);
+                        _logger.LogDebug($"Received a new link to the event - {link.Id}({link.CommandA.NameEng},{link.CommandB.NameEng})");
+                        int poolId = _hub.GetEventPoolId(link.Bookmaker, link.Id);
                         if (poolId != -1)//Event exist in hub
                             if (events.Exists(x => x.EventId == link.Id))
                                 continue;   //This event exist
                             else
-                                hub.OverEvent(poolId, bookmaker);//Drop event from hub 
+                                _hub.OverEvent(poolId, Bookmaker);//Drop event from hub 
                         else
                             events.RemoveAll(x => x.EventId == link.Id);//Drop events from model 
 
                         //Create new event
-                        BetEvent bmEvent = new BetEvent();
-                        bmEvent.EventId = link.Id;
-                        bmEvent.Bookmaker = link.Bookmaker;
-                        bmEvent.Sport = link.Sport;
-                        //bmEvent.Status = link.Status;
-                        bmEvent.CommandA = link.CommandA;
-                        bmEvent.CommandB = link.CommandB;
-                        bmEvent.Status = StatusEvent.New;
+                        _logger.LogDebug($"Event[{link.Id}] - Create new event");
+                        BetEvent bmEvent = new BetEvent
+                        {
+                            EventId = link.Id,
+                            Bookmaker = link.Bookmaker,
+                            Sport = link.Sport,
+                            CommandA = link.CommandA,
+                            CommandB = link.CommandB,
+                            Status = StatusEvent.New
+                        };
 
                         //Add event
-                        hub.AddEvent(link, ref bmEvent);//Pool
+                        _hub.AddEvent(link, ref bmEvent);//Pool
+                        _logger.LogDebug($"Event[{link.Id}] - Add in pool");
                         events.Add(bmEvent);//Model
+                        _logger.LogDebug($"Event[{link.Id}] - Add in model");
+                    }
+
+            //Check OVER event
+            long[] eventsIDs = events.Where(x => x.Status == StatusEvent.Over)?.Select(x => x.EventId).ToArray();
+            if (eventsIDs.Length > 1)
+                foreach (var item in events)
+                    if (eventsIDs.Contains(item.EventId))
+                    {
+                        _hub.OverEvent(item.PoolId, Bookmaker);
+                        _logger.LogDebug($"Event[{item.EventId}] - Drop from pool");
+                        events.Remove(item);
+                        _logger.LogDebug($"Event[{item.EventId}] - Remove from model");
                     }
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {//FIX Проверить асинхронность данного блока
-            //Stopwatch stopwatch = new Stopwatch();
-            if (HttpClient == null)
-                throw new Exception($"Model {bookmaker} don't have httpClient ");
+            if (_httpClient == null)
+                throw new Exception($"Model {Bookmaker} don't have httpClient ");
             while (!stoppingToken.IsCancellationRequested)
                 try
                 {
-                    //stopwatch.Restart();
-                    CheckNewEvents();
-                    CheckOverEvents();
+                    CheckEvents();
 
                     //Update odds in events
                     Parallel.ForEach(events, x =>
                         x.UpdateOdds(
-                            HttpClient.GetDictionaryOdds(x.EventId, x.Sport)
-                    ));
-
-                    //await Task.Delay(delay, stoppingToken);
-                    await Task.Delay(10, stoppingToken);
+                            _httpClient.GetDictionaryOdds(x.EventId, x.Sport)
+                        ));
+                    await Task.Delay(_delay, stoppingToken);
                 }
-                catch (Exception ex) {
-                    _logger.LogError(ex,"Ошибка во время выполнения модели букмеккера - {0}",bookmaker.ToString()); 
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Ошибка во время выполнения модели букмеккера - {0}", Bookmaker.ToString());
                 }
-                //finally
-                //{
-                //    stopwatch.Stop();
-                //    File.AppendAllText($"Logs\\stopwatch\\bm_{bookmaker}.log", $"---{stopwatch.Elapsed}---" + "\r\n");
-                //}
+                finally
+                {
+                    _hub.UpdateBookmakerStatus(Bookmaker);
+                }
         }
     }
 
     #region Заглушки для запуска служб
     public class Service_1xbet : BookmakerService
     {
-        public Service_1xbet(ILogger<Service_1xbet> logger, IBookmakerMediator mediator)
-            : base(logger, mediator, Bookmaker._1xbet)
+        public Service_1xbet(ILogger<Service_1xbet> logger, ISetting setting, IBookmakerMediator mediator)
+            : base(logger, setting, mediator,  Bookmaker._1xbet)
         { }
     }
 
     public class Service_favbet : BookmakerService
     {
-        public Service_favbet(ILogger<Service_favbet> logger, IBookmakerMediator mediator)
-            : base(logger, mediator, Bookmaker._favbet)
+        public Service_favbet(ILogger<Service_favbet> logger, ISetting setting, IBookmakerMediator mediator)
+            : base(logger, setting, mediator,  Bookmaker._favbet)
         { }
     }
     #endregion
