@@ -30,12 +30,14 @@ namespace ForkBro
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
+                    
+        // <InterfaceName> [<InputParams>]
         #region ISetting [HostBuilderContext]
         services.AddTransient<ISetting, AppSettings>();
         #endregion
 
-        #region Mediator [ISetting]
-        services.AddSingleton<HubMediator>();
+        #region Mediator [ILogger,ISetting]
+        services.AddSingleton<HubMediator>(); //Прикрепление одной реализации на несколько интерфейсов
         services.AddSingleton<IScannerMediator>(x => x.GetRequiredService<HubMediator>());
         services.AddSingleton<IBookmakerMediator>(x => x.GetRequiredService<HubMediator>());
         services.AddSingleton<IDaemonMasterMediator>(x => x.GetRequiredService<HubMediator>());

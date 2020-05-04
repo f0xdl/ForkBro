@@ -12,11 +12,11 @@ using ForkBro.BookmakerModel.BaseEvents;
 
 namespace ForkBro.Common.BookmakerClient
 {
-    public abstract class BaseHttpRequest
+    public abstract class BaseRequest
     {
         public Bookmaker BM { get; protected internal set; }
 
-        public static BaseHttpRequest GetInstance(Bookmaker bookmaker)
+        public static BaseRequest GetInstance(Bookmaker bookmaker)
             => bookmaker switch
             {
                 Bookmaker._1xbet => new HttpRequest_1xbet(),

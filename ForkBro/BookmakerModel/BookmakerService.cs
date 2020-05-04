@@ -18,13 +18,13 @@ namespace ForkBro.BookmakerModel
 {
     public abstract class BookmakerService : BackgroundService
     {
-        readonly List<BetEvent> events;
-        readonly int _delay;
-        readonly IBookmakerMediator _hub;
-
         protected readonly Bookmaker Bookmaker;
+        readonly int _delay;
+        readonly BaseRequest _httpRequest;
+        readonly List<BetEvent> events;
+        readonly IConversionDataOdds conversion;
+        readonly IBookmakerMediator _hub;
         readonly ILogger<BookmakerService> _logger;
-        readonly BaseHttpRequest _httpClient;
 
         protected BookmakerService(ILogger<BookmakerService> logger,ISetting setting, IBookmakerMediator mediator, Bookmaker BM)
         {
@@ -32,11 +32,11 @@ namespace ForkBro.BookmakerModel
             _hub = mediator;
             Bookmaker = BM;
             _delay = setting.Companies.First(x => x.id == BM).repeat;
-            _httpClient = BaseHttpRequest.GetInstance(Bookmaker);
+            //_httpClient = BaseRequest.GetInstance(Bookmaker);
             events = new List<BetEvent>();
         }
     
-        void CheckEvents()
+        async Task CheckEvents()
         {
             //Check NEW link
             if (_hub.HaveNewLink())
@@ -86,29 +86,30 @@ namespace ForkBro.BookmakerModel
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {//FIX Проверить асинхронность данного блока
-            if (_httpClient == null)
-                throw new Exception($"Model {Bookmaker} don't have httpClient ");
-            while (!stoppingToken.IsCancellationRequested)
-                try
-                {
-                    CheckEvents();
+        {
+            //FIX Проверить асинхронность данного блока
+            //if (_httpClient == null)
+            //    throw new Exception($"Model {Bookmaker} don't have httpClient ");
+            //while (!stoppingToken.IsCancellationRequested)
+            //    try
+            //    {
+            //        CheckEvents();
 
-                    //Update odds in events
-                    Parallel.ForEach(events, x =>
-                        x.UpdateOdds(
-                            _httpClient.GetDictionaryOdds(x.EventId, x.Sport)
-                        ));
-                    await Task.Delay(_delay, stoppingToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Ошибка во время выполнения модели букмеккера - {0}", Bookmaker.ToString());
-                }
-                finally
-                {
-                    _hub.UpdateBookmakerStatus(Bookmaker);
-                }
+            //        //Update odds in events
+            //        Parallel.ForEach(events, x =>
+            //            x.UpdateOdds(
+            //                _httpClient.GetDictionaryOdds(x.EventId, x.Sport)
+            //            ));
+            //        await Task.Delay(_delay, stoppingToken);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        _logger.LogError(ex, "Ошибка во время выполнения модели букмеккера - {0}", Bookmaker.ToString());
+            //    }
+            //    finally
+            //    {
+            //        _hub.UpdateBookmakerStatus(Bookmaker);
+            //    }
         }
     }
 

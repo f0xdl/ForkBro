@@ -12,7 +12,7 @@ using System.Threading;
 
 namespace ForkBro.Common.BookmakerClient
 {
-    public class HttpRequest_favbet : BaseHttpRequest
+    public class HttpRequest_favbet : BaseRequest
     {
         public HttpRequest_favbet() { BM = Bookmaker._favbet; }
        

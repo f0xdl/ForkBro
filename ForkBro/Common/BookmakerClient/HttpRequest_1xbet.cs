@@ -11,7 +11,7 @@ using System.Diagnostics;
 
 namespace ForkBro.Common.BookmakerClient
 {
-    public class HttpRequest_1xbet : BaseHttpRequest
+    public class HttpRequest_1xbet : BaseRequest
     {
         public HttpRequest_1xbet() => BM = Bookmaker._1xbet;
         public override ConcurrentDictionary<ushort, double[,]> GetDictionaryOdds(long eventId, Sport sport)

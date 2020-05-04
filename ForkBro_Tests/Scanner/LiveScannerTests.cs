@@ -58,7 +58,8 @@ namespace ForkBro.Tests
                 logger.LogInformation($"BM={item.Bookmaker.ToString()}, " +
                     $"Sport={item.Sport.ToString()}, " +
                     $"ID={item.Id}, " +
-                    $"Status={item.Status.ToString()}");
+                    //$"Status={item.Status.ToString()}"
+                    "");
             }
 
             //Assert

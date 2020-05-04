@@ -11,7 +11,6 @@ namespace ForkBro.BookmakerModel
 {
     public class BetEvent
     {
-        bool hasUpdate;
         DateTime dtUpdate;
         DateTime dtComparison;
         ConcurrentDictionary<ushort, double[,]> bettingOdds; // Key = (ushort)((byte)BetType + (((byte)EventUnit) << 8))
@@ -41,7 +40,7 @@ namespace ForkBro.BookmakerModel
             set
             {
                 dtUpdate = value;
-                hasUpdate = true;
+                HasUpdate = true;
             }
         }
         public DateTime DtComparison
@@ -50,13 +49,22 @@ namespace ForkBro.BookmakerModel
             set
             {
                 dtComparison = value;
-                hasUpdate = false;
+                HasUpdate = false;
             }
         }
 
         //To Model
-        public void AddOrUpdate(ushort type, double[,] coefArray) => bettingOdds.AddOrUpdate(type, (k)=>coefArray, (k, v)=>coefArray);
-        public void UpdateOdds(ConcurrentDictionary<ushort, double[,]> newOdds)
+        public void AddOrUpdateOdds(ushort type, double[,] coefArray)
+        {
+            bettingOdds.AddOrUpdate(type, (k) => coefArray, (k, v) => coefArray);
+            DtUpdate = DateTime.Now;
+        }
+        public void RemoveOdds(ushort type)
+        {
+            bettingOdds.TryRemove(type,out _);
+            DtUpdate = DateTime.Now;
+        }
+        public void ReplaceAllOdds(ConcurrentDictionary<ushort, double[,]> newOdds)
         {
             bettingOdds = newOdds;
             DtUpdate = DateTime.Now;
@@ -67,7 +75,7 @@ namespace ForkBro.BookmakerModel
             DtOver = DateTime.Now;
         }
         //To Daemons
-        public bool HasUpdate { get => hasUpdate; }
+        public bool HasUpdate { get; private set; }
         public double[,] GetBetTypeOdds(ushort type) => bettingOdds[type];
         public Dictionary<ushort, double[,]> AllOdds => bettingOdds.ToDictionary(x => x.Key, x => x.Value);//Debug write to json file
         public ConcurrentDictionary<ushort, double[,]> GetSnapshotOdds() => bettingOdds;

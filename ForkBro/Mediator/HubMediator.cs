@@ -156,36 +156,4 @@ namespace ForkBro.Mediator
         #endregion
 
     }
-
-    public interface IScannerMediator
-    {
-        Bookmaker[] GetBookmakers();
-        void EventEnqueue(IEventLink link);
-        void UpdateScannerStatus();
-        int ScannerDelay { get; set; }
-    }
-    public interface IBookmakerMediator
-    {
-        bool HaveNewLink();
-        bool TryGetNewEvent(Bookmaker bookmaker, out IEventLink link);
-        void AddEvent(IEventLink link, ref BetEvent bookmakerEvent);
-        void OverEvent(int idPool, Bookmaker bm);
-        int GetEventPoolId(Bookmaker bookmaker, long id);
-        
-        void UpdateBookmakerStatus(Bookmaker bm);
-    }
-    public interface IDaemonMasterMediator
-    {
-        int CountDaemons { get; set; }
-
-        void AddFork(List<Fork> forks);
-        PoolRaw GetNextPool();
-        void UpdateDaemonMasterStatus();
-    }
-    public interface IApiMediator
-    {
-        Dictionary<Bookmaker, int> CountEvents();
-        Dictionary<Bookmaker, DateTime> GetLastUpdate();
-
-    }
 }

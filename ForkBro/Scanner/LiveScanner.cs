@@ -20,7 +20,7 @@ namespace ForkBro.Scanner
         private readonly ILogger<LiveScanner> _logger;
         private readonly int _delay;
         private readonly Dictionary<Bookmaker, List<IEventLink>> _events;
-        private readonly BaseHttpRequest[] _httpClients;
+        private readonly BaseRequest[] _httpClients;
 
 
         public LiveScanner(ILogger<LiveScanner> logger, IScannerMediator mediator, ISetting setting)
@@ -38,9 +38,9 @@ namespace ForkBro.Scanner
                 _events.Add(bm, new List<IEventLink>());
 
             //Add clients
-            _httpClients = new BaseHttpRequest[bookmakers.Length];
+            _httpClients = new BaseRequest[bookmakers.Length];
             for (int i = 0; i < bookmakers.Length; i++)
-                _httpClients[i] = BaseHttpRequest.GetInstance(bookmakers[i]);
+                _httpClients[i] = BaseRequest.GetInstance(bookmakers[i]);
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -62,7 +62,7 @@ namespace ForkBro.Scanner
             _logger.LogInformation("End scan bookmakers at: {time} (ElapsedMilliseconds:{int})", DateTimeOffset.Now, 0);
         }
 
-        private void GetEventChanges(BaseHttpRequest httpRequest)
+        private void GetEventChanges(BaseRequest httpRequest)
         {
             DateTime utcNow = DateTime.UtcNow;
             List<IEventLink> newEventLinks = new List<IEventLink>();
