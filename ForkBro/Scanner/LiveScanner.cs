@@ -42,9 +42,10 @@ namespace ForkBro.Scanner
             for (int i = 0; i < bookmakers.Length; i++)
                 _httpClients[i] = BaseRequest.GetInstance(bookmakers[i]);
         }
+        
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Start scan bookmakers at: {time}", DateTimeOffset.Now);
+            _logger.LogInformation("Start scan bookmakers");
             while (!stoppingToken.IsCancellationRequested)
                 try
                 {

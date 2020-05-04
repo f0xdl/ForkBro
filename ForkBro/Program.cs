@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ForkBro.Configuration;
 using ForkBro.BookmakerModel;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ForkBro.Common;
+using NLog.Extensions.Logging;
 
 namespace ForkBro
 {
@@ -24,9 +26,23 @@ namespace ForkBro
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
-                .ConfigureLogging((hostContext, logging) =>
+            .ConfigureAppConfiguration((hostingContext,config) =>
+            {
+                config.AddJsonFile("logSettings.json", false,false);
+            })
+            .ConfigureLogging((hostContext, logging) =>
                 {
-                logging.AddFile(hostContext.Configuration.GetSection("Logging"));
+                    try
+                    {
+                        var abc = hostContext.Configuration.GetSection("NLog");
+                        var configNlog = new NLogLoggingConfiguration(abc);
+                        logging.AddNLog(configNlog);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                    
                 })
                 .ConfigureServices((hostContext, services) =>
                 {

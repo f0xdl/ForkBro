@@ -1,0 +1,65 @@
+{
+ "NLog": {
+    "autoReload": false,
+    "throwConfigExceptions": true,
+    "internalLogLevel": "Off",
+    "internalLogFile": "${basedir}/logs/internal.txt",
+    "variables": {
+      "logDir": "${basedir}/logs/${shortdate}",
+      "firstPart": "${longdate} ${uppercase:${level}}  ${message} ${newline}${logger}",
+      "secondPart": "${callsite:className=True:fileName=False:includeSourcePath=True:methodName=True}${newline}${exception:format=tostring}${newline}"
+    },
+    "targets": {
+      "loginfo": {
+        "type": "File",
+        "fileName": "${logDir}/${logger}.log",
+        "layout": {
+          "type": "CSVLayout",
+          "delimiter": "Tab",
+          "Columns": [{
+            "name": "timestamp",
+            "layout": "${date}"
+          },{
+            "name": "level",
+            "layout": "${level}"
+          },{
+            "name": "message",
+            "layout": "${message}"
+          }
+          ]
+        }
+      },
+      "logerror": {
+        "type": "File",
+        "fileName": "${logDir}/${logger}.err",
+        "layout": "${firstPart} - ${secondPart}"
+      },
+      "logconsole": {
+        "type": "Console"
+      }
+    },
+    "rules": [
+      {
+        "logger": "*",
+        "minLevel": "info",
+        "writeTo": "loginfo"
+      },
+      {
+        "logger": "*",
+        "minLevel": "error",
+        "writeTo": "logerror",
+        "filters": {
+          "whenRepeated": {
+            "layout": "${exception}",
+            "action": "Ignore"
+          }
+        }
+      },
+      {
+        "logger": "*",
+        "minLevel": "trace",
+        "writeTo": "logconsole"
+      }
+    ]
+  }
+}
