@@ -1,11 +1,75 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace ForkBro.BookmakerModel.BaseEvents
 {
-    public class Outcome
+    public class RequestEvent_favbet
+    {
+
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        //[JsonProperty("jsonrpc")]
+        //public string Jsonrpc { get; set; }
+
+        [JsonProperty("result")]
+        public IList<BaseEvent_favbet> Result { get; set; }
+    }
+    public class BaseEvent_favbet
+    {
+
+        [JsonProperty("event_id")]
+        public int EventId { get; set; }
+
+        [JsonProperty("market_has_param")]
+        public bool MarketHasParam { get; set; }
+
+        [JsonProperty("market_id")]
+        public int MarketId { get; set; }
+
+        [JsonProperty("market_name")]
+        public string MarketName { get; set; }
+
+        [JsonProperty("market_order")]
+        public string MarketOrder { get; set; }
+
+        [JsonProperty("market_suspend")]
+        public bool MarketSuspend { get; set; }
+
+        [JsonProperty("market_template_id")]
+        public int MarketTemplateId { get; set; }
+
+        [JsonProperty("market_template_view_id")]
+        public int MarketTemplateViewId { get; set; }
+
+        [JsonProperty("market_template_view_schema")]
+        public object MarketTemplateViewSchema { get; set; }
+
+        [JsonProperty("market_template_weigh")]
+        public int MarketTemplateWeigh { get; set; }
+
+        [JsonProperty("outcomes")]
+        public IList<Outcome_favbet> Outcomes { get; set; }
+
+        [JsonProperty("result_type_id")]
+        public int ResultTypeId { get; set; }
+
+        [JsonProperty("result_type_name")]
+        public string ResultTypeName { get; set; }
+
+        [JsonProperty("result_type_short_name")]
+        public string ResultTypeShortName { get; set; }
+
+        [JsonProperty("result_type_weigh")]
+        public int ResultTypeWeigh { get; set; }
+
+        [JsonProperty("service_id")]
+        public int ServiceId { get; set; }
+
+        [JsonProperty("sport_id")]
+        public int SportId { get; set; }
+    }
+    public class Outcome_favbet
     {
 
         [JsonProperty("outcome_coef")]
@@ -44,74 +108,4 @@ namespace ForkBro.BookmakerModel.BaseEvents
         [JsonProperty("participant_number")]
         public int? ParticipantNumber { get; set; }
     }
-
-    public class BaseEvent_favbet
-    {
-
-        [JsonProperty("event_id")]
-        public int EventId { get; set; }
-
-        [JsonProperty("market_has_param")]
-        public bool MarketHasParam { get; set; }
-
-        [JsonProperty("market_id")]
-        public int MarketId { get; set; }
-
-        [JsonProperty("market_name")]
-        public string MarketName { get; set; }
-
-        [JsonProperty("market_order")]
-        public string MarketOrder { get; set; }
-
-        [JsonProperty("market_suspend")]
-        public bool MarketSuspend { get; set; }
-
-        [JsonProperty("market_template_id")]
-        public int MarketTemplateId { get; set; }
-
-        [JsonProperty("market_template_view_id")]
-        public int MarketTemplateViewId { get; set; }
-
-        [JsonProperty("market_template_view_schema")]
-        public object MarketTemplateViewSchema { get; set; }
-
-        [JsonProperty("market_template_weigh")]
-        public int MarketTemplateWeigh { get; set; }
-
-        [JsonProperty("outcomes")]
-        public IList<Outcome> Outcomes { get; set; }
-
-        [JsonProperty("result_type_id")]
-        public int ResultTypeId { get; set; }
-
-        [JsonProperty("result_type_name")]
-        public string ResultTypeName { get; set; }
-
-        [JsonProperty("result_type_short_name")]
-        public string ResultTypeShortName { get; set; }
-
-        [JsonProperty("result_type_weigh")]
-        public int ResultTypeWeigh { get; set; }
-
-        [JsonProperty("service_id")]
-        public int ServiceId { get; set; }
-
-        [JsonProperty("sport_id")]
-        public int SportId { get; set; }
-    }
-
-    public class RequestEvent_favbet
-    {
-
-        [JsonProperty("id")]
-        public int Id { get; set; }
-
-        //[JsonProperty("jsonrpc")]
-        //public string Jsonrpc { get; set; }
-
-        [JsonProperty("result")]
-        public IList<BaseEvent_favbet> Result { get; set; }
-    }
-
-
 }

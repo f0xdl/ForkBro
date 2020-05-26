@@ -25,60 +25,65 @@ namespace ForkBro
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration((hostingContext,config) =>
-            {
-                config.AddJsonFile("logSettings.json", false,false);
-            })
-            .ConfigureLogging((hostContext, logging) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostingContext, config) =>
                 {
-                    try
-                    {
-                        var abc = hostContext.Configuration.GetSection("NLog");
-                        var configNlog = new NLogLoggingConfiguration(abc);
-                        logging.AddNLog(configNlog);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
-                    
+                    config.AddJsonFile("logSettings.json", false, false);
+                })
+                .ConfigureLogging((hostContext, logging) =>
+                {
+                    var section = hostContext.Configuration.GetSection("NLog");
+                    logging.AddNLog(new NLogLoggingConfiguration(section));
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
-                    
-        // <InterfaceName> [<InputParams>]
-        #region ISetting [HostBuilderContext]
-        services.AddTransient<ISetting, AppSettings>();
-        #endregion
+                    // <InterfaceName> [<InputParams>]
 
-        #region Mediator [ILogger,ISetting]
-        services.AddSingleton<HubMediator>(); //Прикрепление одной реализации на несколько интерфейсов
-        services.AddSingleton<IScannerMediator>(x => x.GetRequiredService<HubMediator>());
-        services.AddSingleton<IBookmakerMediator>(x => x.GetRequiredService<HubMediator>());
-        services.AddSingleton<IDaemonMasterMediator>(x => x.GetRequiredService<HubMediator>());
-        services.AddSingleton<IApiMediator>(x => x.GetRequiredService<HubMediator>());
-        #endregion
+                    #region IOptions [HostBuilderContext]
+                    services.Configure<AppSettings>(hostContext.Configuration);
 
-        #region LiveScanner [ILogger,IScannerMediator,ISetting]
-        services.AddHostedService<LiveScanner>();
-        #endregion
+                    #endregion
 
-        #region BookmakerService [ILogger,IBookmakerMediator]
-        foreach (var item in (new AppSettings(hostContext)).Companies)
-            switch (item.id)
-            {
-                case Bookmaker._favbet:
-                    services.AddHostedService<Service_favbet>(); break;
-                case Bookmaker._1xbet:
-                    services.AddHostedService<Service_1xbet>(); break;
-                default: throw new Exception("Неизвесный тип букмекера: " + item.id.ToString());
-            }
-        #endregion
+                    #region Mediator [ILogger,IOptions<AppSettings>]
 
-        #region DaemonMaster [ILogger,ICalcDaemonMediator]
-        services.AddHostedService<DaemonMaster>();
-        #endregion
+                    services.AddSingleton<HubMediator>(); //Прикрепление одной реализации на несколько интерфейсов
+                    services.AddSingleton<IScannerMediator>(x => x.GetRequiredService<HubMediator>());
+                    services.AddSingleton<IBookmakerMediator>(x => x.GetRequiredService<HubMediator>());
+                    services.AddSingleton<IDaemonMasterMediator>(x => x.GetRequiredService<HubMediator>());
+                    services.AddSingleton<IApiMediator>(x => x.GetRequiredService<HubMediator>());
+
+                    #endregion
+
+                    #region LiveScanner [ILogger,IScannerMediator,IOptions<AppSettings>]
+
+                    services.AddHostedService<LiveScanner>();
+
+                    #endregion
+
+                    #region BookmakerService [ILogger,IBookmakerMediator]
+                    {
+                        AppSettings appSettings = new AppSettings();
+                        hostContext.Configuration.Bind(appSettings);
+
+                        foreach (Bookmaker item in appSettings.GetEBookmakers())
+                            switch (item)
+                            {
+                                case Bookmaker._favbet:
+                                    services.AddHostedService<ServiceFavbet>();
+                                    break;
+                                case Bookmaker._1xbet:
+                                    services.AddHostedService<Service1xBet>();
+                                    break;
+                                default: throw new Exception("Неизвесный тип букмекера: " + item.ToString());
+                            }
+                    }
+                    #endregion
+
+                #region DaemonMaster [ILogger,ICalcDaemonMediator]
+
+                    services.AddHostedService<DaemonMaster>();
+
+                    #endregion
                 });
     }
 }

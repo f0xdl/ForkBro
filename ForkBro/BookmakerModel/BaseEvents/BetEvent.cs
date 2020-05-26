@@ -11,9 +11,9 @@ namespace ForkBro.BookmakerModel
 {
     public class BetEvent
     {
-        DateTime dtUpdate;
-        DateTime dtComparison;
-        ConcurrentDictionary<ushort, double[,]> bettingOdds; // Key = (ushort)((byte)BetType + (((byte)EventUnit) << 8))
+        DateTime _dtUpdate;
+        DateTime _dtComparison;
+        ConcurrentDictionary<ushort, double[,]> _bettingOdds; // Key = (ushort)((byte)BetType + (((byte)EventUnit) << 8))
 
         public long EventId { get; set; }
         public int PoolId { get; set; }
@@ -21,7 +21,7 @@ namespace ForkBro.BookmakerModel
 
         public BetEvent()
         {
-            bettingOdds = new ConcurrentDictionary<ushort, double[,]>();
+            _bettingOdds = new ConcurrentDictionary<ushort, double[,]>();
             Sport = Sport.None;
         }
         //Признаки
@@ -36,19 +36,19 @@ namespace ForkBro.BookmakerModel
         public DateTime DtOver;
         public DateTime DtUpdate
         {
-            get => dtUpdate;
+            get => _dtUpdate;
             set
             {
-                dtUpdate = value;
+                _dtUpdate = value;
                 HasUpdate = true;
             }
         }
         public DateTime DtComparison
         {
-            get => dtComparison;
+            get => _dtComparison;
             set
             {
-                dtComparison = value;
+                _dtComparison = value;
                 HasUpdate = false;
             }
         }
@@ -56,17 +56,17 @@ namespace ForkBro.BookmakerModel
         //To Model
         public void AddOrUpdateOdds(ushort type, double[,] coefArray)
         {
-            bettingOdds.AddOrUpdate(type, (k) => coefArray, (k, v) => coefArray);
+            _bettingOdds.AddOrUpdate(type, (k) => coefArray, (k, v) => coefArray);
             DtUpdate = DateTime.Now;
         }
         public void RemoveOdds(ushort type)
         {
-            bettingOdds.TryRemove(type,out _);
+            _bettingOdds.TryRemove(type,out _);
             DtUpdate = DateTime.Now;
         }
         public void ReplaceAllOdds(ConcurrentDictionary<ushort, double[,]> newOdds)
         {
-            bettingOdds = newOdds;
+            _bettingOdds = newOdds;
             DtUpdate = DateTime.Now;
         }
         public void EventOver()
@@ -76,9 +76,9 @@ namespace ForkBro.BookmakerModel
         }
         //To Daemons
         public bool HasUpdate { get; private set; }
-        public double[,] GetBetTypeOdds(ushort type) => bettingOdds[type];
-        public Dictionary<ushort, double[,]> AllOdds => bettingOdds.ToDictionary(x => x.Key, x => x.Value);//Debug write to json file
-        public ConcurrentDictionary<ushort, double[,]> GetSnapshotOdds() => bettingOdds;
+        public double[,] GetBetTypeOdds(ushort type) => _bettingOdds[type];
+        public Dictionary<ushort, double[,]> AllOdds => _bettingOdds.ToDictionary(x => x.Key, x => x.Value);//Debug write to json file
+        public ConcurrentDictionary<ushort, double[,]> GetSnapshotOdds() => _bettingOdds;
        
     }
 }

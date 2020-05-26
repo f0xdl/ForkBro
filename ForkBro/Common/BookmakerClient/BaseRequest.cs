@@ -14,7 +14,7 @@ namespace ForkBro.Common.BookmakerClient
 {
     public abstract class BaseRequest
     {
-        public Bookmaker BM { get; protected internal set; }
+        public Bookmaker bookmaker { get; protected set; }
 
         public static BaseRequest GetInstance(Bookmaker bookmaker)
             => bookmaker switch
@@ -24,29 +24,26 @@ namespace ForkBro.Common.BookmakerClient
                 _ => throw new Exception("Клиента для букмекера " + bookmaker.ToString() + " не существует")
             };
 
-        public abstract ConcurrentDictionary<ushort, double[,]> GetDictionaryOdds(long eventId, Sport sport);
-
         public abstract IGameList GetEventsList();
-        public abstract string GetBetOdds(long eventId);
+        public abstract T GetBetOdds<T>(long eventId);
 
         //Async Get/Post request
-        public async Task<string> GetAsync(string Url, string Data)
+        protected static async Task<string> GetAsync(string url, string data)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url + "?" + Data);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url + "?" + data);
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-            using (Stream stream = response.GetResponseStream())
-            using (StreamReader reader = new StreamReader(stream))
-            {
+            using(HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+            using(Stream stream = response.GetResponseStream())
+            using(StreamReader reader = new StreamReader(stream!))
                 return await reader.ReadToEndAsync();
-            }
         }
-        public async Task<string> PostAsync(string Url, string Data, string ContentType)
+
+        protected static async Task<string> PostAsync(string url, string data, string contentType)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = "POST";
-            request.ContentType = ContentType;
-            byte[] sentData = Encoding.UTF8.GetBytes(Data);
+            request.ContentType = contentType;
+            byte[] sentData = Encoding.UTF8.GetBytes(data);
             request.ContentLength = sentData.Length;
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
             request.UserAgent = "Mozilla/5.0 (compatible; MSIE 9.0; Windows Phone OS 7.5; Trident/5.0; IEMobile/9.0)";
@@ -54,11 +51,12 @@ namespace ForkBro.Common.BookmakerClient
             sendStream.Write(sentData, 0, sentData.Length);
             sendStream.Close();
 
-            using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-            using (Stream stream = response.GetResponseStream())
-            using (StreamReader reader = new StreamReader(stream))
-                return await reader.ReadToEndAsync();
+            using HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
+            using Stream stream = response.GetResponseStream();
+            using StreamReader reader = new StreamReader(stream!);
+            return await reader.ReadToEndAsync();
         }
 
+        public abstract bool TestConnection();
     }
 }

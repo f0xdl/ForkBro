@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace ForkBro.Configuration
 {
-    public class AppSettings : ISetting
+    public class AppSettings
     {
         public int LiveScanRepeat { get; set; }
         public int CountDaemon { get; set; }
@@ -30,13 +30,12 @@ namespace ForkBro.Configuration
             return bookmakers;
         }
 
-        public AppSettings(HostBuilderContext hostContext)
-        {
-            hostContext.Configuration.Bind("AppSetting", this);
-        }
-
         //For Unit Test
-        public AppSettings() { }
+        public AppSettings()
+        {
+            Companies = new List<BookmakersProp>();
+            TrackedSports = new Sport[0];
+        }
     }
 }
 

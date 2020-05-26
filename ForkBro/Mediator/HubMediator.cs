@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Options;
 
 namespace ForkBro.Mediator
 {
@@ -26,19 +27,19 @@ namespace ForkBro.Mediator
         public int ScannerDelay { get; set; }
         public int CountDaemons { get; set; }
 
-        public HubMediator(ILogger<HubMediator> logger, ISetting setting)
+        public HubMediator(ILogger<HubMediator> logger, IOptions<AppSettings> setting)
         {
             _statusServices = new Dictionary<Bookmaker, DateTime>();
             _bookmakersDelay = new Dictionary<Bookmaker, int>();
-            _hubManager = new HubManager(setting.CountPool, setting.MinQuality);
+            _hubManager = new HubManager(setting.Value.CountPool, setting.Value.MinQuality);
             Links = new ConcurrentQueue<IEventLink>();
 
             _logger = logger;
-            ScannerDelay = setting.LiveScanRepeat;
-            CountDaemons = setting.CountDaemon;
+            ScannerDelay = setting.Value.LiveScanRepeat;
+            CountDaemons = setting.Value.CountDaemon;
 
             //Bookmakers
-            foreach (BookmakersProp bm in setting.Companies)
+            foreach (BookmakersProp bm in setting.Value.Companies)
             {
                 _bookmakersDelay.Add(bm.id, bm.repeat);
                 _statusServices.Add(bm.id, DateTime.Now);

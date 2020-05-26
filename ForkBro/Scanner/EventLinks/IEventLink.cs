@@ -4,12 +4,6 @@ using System.Collections.Generic;
 
 namespace ForkBro.Scanner.EventLinks
 {
-    public interface IGameList
-    {
-        public bool Success { get;}
-        public IEventLink[] EventsArray { get; }
-    }
-
     public interface IEventLink
     {
         public Bookmaker Bookmaker { get; set; }

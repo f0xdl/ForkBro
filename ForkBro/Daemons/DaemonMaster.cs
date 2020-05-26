@@ -4,6 +4,7 @@ using ForkBro.Configuration;
 using ForkBro.Mediator;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,11 +21,11 @@ namespace ForkBro.Daemons
         List<Task<Fork[]>> forks;
         private readonly ILogger<DaemonMaster> _logger;
         readonly int daemonCount;
-        public DaemonMaster(ILogger<DaemonMaster> logger, IDaemonMasterMediator mediator, ISetting setting)
+        public DaemonMaster(ILogger<DaemonMaster> logger, IDaemonMasterMediator mediator, IOptions<AppSettings> setting)
         {
             forks = new List<Task<Fork[]>>(mediator.CountDaemons);
             hub = mediator;
-            daemonCount = setting.CountDaemon;
+            daemonCount = setting.Value.CountDaemon;
             _logger = logger;
         }
 

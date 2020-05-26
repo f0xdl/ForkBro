@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using ForkBro.Common;
-using Newtonsoft.Json;
 
 namespace ForkBro.Scanner.EventLinks
 {
@@ -61,13 +59,5 @@ namespace ForkBro.Scanner.EventLinks
         public string event_name { get; set; }
         public string sport_name { get; set; }
         public string tournament_name { get; set; }
-    }
-
-    public class GameList_favbet : IGameList
-    {
-        public bool Success => events != null && events.Count > 0;
-        [JsonProperty("events")]
-        public List<EventLink_favbet> events { get; set; }
-        public IEventLink[] EventsArray => events.ToArray();
     }
 }

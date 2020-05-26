@@ -5,6 +5,7 @@ using ForkBro.Mediator;
 using ForkBro.Scanner.EventLinks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,11 +24,11 @@ namespace ForkBro.Scanner
         private readonly BaseRequest[] _httpClients;
 
 
-        public LiveScanner(ILogger<LiveScanner> logger, IScannerMediator mediator, ISetting setting)
+        public LiveScanner(ILogger<LiveScanner> logger, IScannerMediator mediator, IOptions<AppSettings> setting)
         {
-            _delay = setting.LiveScanRepeat;
-            _sports = setting.TrackedSports;
-            var bookmakers = setting.GetEBookmakers();
+            _delay = setting.Value.LiveScanRepeat;
+            _sports = setting.Value.TrackedSports;
+            var bookmakers = setting.Value.GetEBookmakers();
 
             _hub = mediator;
             _logger = logger;
@@ -79,19 +80,19 @@ namespace ForkBro.Scanner
                             newEventLinks.Add(item);
 
                 //Удалить события, которых нет в текущей выборке
-                for (int i = 0; i < _events[httpRequest.BM].Count; i++)
+                for (int i = 0; i < _events[httpRequest.bookmaker].Count; i++)
                 {
                     //Поиск события в текущей выборке
                     for (int n = 0; n < newEventLinks.Count; n++)
-                        if (newEventLinks[n]?.Id == _events[httpRequest.BM][i].Id)
+                        if (newEventLinks[n]?.Id == _events[httpRequest.bookmaker][i].Id)
                         {
-                            _events[httpRequest.BM][i].Updated = utcNow;
+                            _events[httpRequest.bookmaker][i].Updated = utcNow;
                             newEventLinks[n] = null;
                             break;
                         }
                     //Если ивент не найден в новом списке и прошло 15 минут
-                    if (_events[httpRequest.BM][i].Updated + new TimeSpan(0, 15, 0) < utcNow)
-                        CloseEvent(_events[httpRequest.BM][i]);
+                    if (_events[httpRequest.bookmaker][i].Updated + new TimeSpan(0, 15, 0) < utcNow)
+                        CloseEvent(_events[httpRequest.bookmaker][i]);
                 }
                 //Добавить событие если его нет в старом списке
                 foreach (IEventLink evLinking in newEventLinks)
